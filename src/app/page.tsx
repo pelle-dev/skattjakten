@@ -4,6 +4,7 @@ import { hostHuntIds, playerHuntIds } from "@/lib/session";
 import { readDb } from "@/lib/store";
 import type { HuntStatus } from "@/lib/types";
 import { DemoButton } from "./DemoButton";
+import { HowItWorks } from "./HowItWorks";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,15 @@ export default async function Home() {
             Gå med i en skattjakt
           </Link>
         </div>
+
+        <section className="card how" style={{ marginTop: 20 }}>
+          <h2>Små ledtrådar, stora äventyr</h2>
+          <p>
+            Skapa en skattjakt med kluriga frågor och roliga uppdrag. Du gömmer ledtrådarna och skatten. Deltagarna använder mobilen för att skanna,
+            lösa uppgifter och hitta vidare – hela vägen till skatten.
+          </p>
+          <HowItWorks />
+        </section>
 
         {playing.length > 0 && (
           <section className="card" style={{ marginTop: 20 }}>
