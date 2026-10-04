@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
-import { PLAN_LIMITS } from "@/lib/catalog";
+import { LIMITS } from "@/lib/catalog";
 import { maxScore, ranking } from "@/lib/game";
 import { checkpointsOf } from "@/lib/hunts";
 import { formatDuration } from "@/lib/i18n";
@@ -19,7 +19,7 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
   const total = checkpointsOf(db, id).length;
   const finished = hunt.status === "finished";
   const winners = rows.filter((r) => r.place === 1);
-  const diploma = PLAN_LIMITS[hunt.plan].diploma;
+  const diploma = LIMITS.diploma;
 
   return (
     <>

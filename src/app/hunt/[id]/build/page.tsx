@@ -92,7 +92,7 @@ export default function BuildPage() {
             </button>
           )}
           <p className="muted small" style={{ margin: "8px 6px 0" }}>
-            {bundle.checkpoints.length} av max {bundle.limits.maxClues} ledtrådar ({bundle.hunt.plan === "free" ? "gratis" : "betald"}).
+            {bundle.checkpoints.length} av max {bundle.limits.maxClues} ledtrådar.
           </p>
         </aside>
 
@@ -308,7 +308,7 @@ function CheckpointEditor({
       {step === 5 && (
         <div>
           {!bundle.limits.missions ? (
-            <div className="notice gold">Uppdrag finns i betalt läge. Byt plan under Inställningar.</div>
+            <div className="notice gold">Uppdrag är avstängda.</div>
           ) : (
             <>
               <label className="field">

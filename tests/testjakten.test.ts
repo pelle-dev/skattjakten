@@ -16,7 +16,7 @@ import {
   startHunt,
   teamStats,
 } from "@/lib/game";
-import { addCheckpoint, checkpointsOf, createHunt, joinHunt, missionOf, questionsOf, teamsOf, treasureOf, UserError, validateHunt } from "@/lib/hunts";
+import { addCheckpoint, checkpointsOf, createHunt, joinHunt, missionOf, questionsOf, teamsOf, treasureOf, updateHuntSettings, UserError, validateHunt } from "@/lib/hunts";
 import { emptyDb, type Db } from "@/lib/types";
 
 const T0 = new Date("2026-10-04T14:00:00Z");
@@ -208,10 +208,10 @@ describe("Testjakten", () => {
     expect(rows[1].elapsedSeconds).toBe(32 * 60);
   });
 
-  it("gratisläget begränsar ledtrådar och lag", () => {
+  it("allt är gratis: mallar, spellägen, lagbild och fler ledtrådar", () => {
     const db = emptyDb();
     const hunt = createHunt(db, {
-      name: "Gratis",
+      name: "Kalas",
       description: "",
       template: "birthday",
       gameMode: "calm",
@@ -219,20 +219,44 @@ describe("Testjakten", () => {
       ageGroup: "child",
       themes: [],
       difficulty: "easy",
-      plan: "free",
       clueCount: 10,
       winMode: "points",
       startMode: "simultaneous",
       startIntervalMinutes: 2,
       allowPhotos: true,
     });
-    expect(checkpointsOf(db, hunt.id)).toHaveLength(3);
-    expect(hunt.gameMode).toBe("classic");
-    expect(hunt.template).toBe("none");
-    expect(hunt.allowPhotos).toBe(false);
-    expect(() => addCheckpoint(db, hunt.id)).toThrow(/max 3/);
-    joinHunt(db, { kind: "new", huntCode: hunt.joinCode, name: "A" });
-    joinHunt(db, { kind: "new", huntCode: hunt.joinCode, name: "B" });
-    expect(() => joinHunt(db, { kind: "new", huntCode: hunt.joinCode, name: "C" })).toThrow(/full/);
+    expect(checkpointsOf(db, hunt.id)).toHaveLength(10);
+    expect(hunt.gameMode).toBe("calm");
+    expect(hunt.template).toBe("birthday");
+    expect(hunt.allowPhotos).toBe(true);
+    addCheckpoint(db, hunt.id);
+    expect(checkpointsOf(db, hunt.id)).toHaveLength(11);
+    for (const name of ["A", "B", "C"]) joinHunt(db, { kind: "new", huntCode: hunt.joinCode, name });
+  });
+
+  it("gamla jakter som sparats som gratis får allt", () => {
+    const db = emptyDb();
+    const hunt = createHunt(db, {
+      name: "Gammal",
+      description: "",
+      template: "none",
+      gameMode: "classic",
+      playMode: "team",
+      ageGroup: "child",
+      themes: [],
+      difficulty: "easy",
+      clueCount: 3,
+      winMode: "points",
+      startMode: "simultaneous",
+      startIntervalMinutes: 2,
+      allowPhotos: false,
+    });
+    Object.assign(hunt, { plan: "free", maxClues: 3 });
+    addCheckpoint(db, hunt.id);
+    expect(checkpointsOf(db, hunt.id)).toHaveLength(4);
+    for (const name of ["A", "B", "C"]) joinHunt(db, { kind: "new", huntCode: hunt.joinCode, name });
+    updateHuntSettings(db, hunt.id, { gameMode: "teamBattle", allowPhotos: true });
+    expect(hunt.gameMode).toBe("teamBattle");
+    expect(hunt.allowPhotos).toBe(true);
   });
 });

@@ -36,7 +36,7 @@ export default async function HostLayout({ children, params }: { children: React
           <h1 style={{ marginBottom: 4 }}>{hunt.name}</h1>
           <p className="muted small" style={{ marginBottom: 12 }}>
             Kod för deltagare: <strong style={{ letterSpacing: "0.15em" }}>{hunt.joinCode}</strong> ·{" "}
-            {hunt.plan === "paid" ? "Betald" : "Gratis"} · {hunt.status === "draft" ? "Utkast" : hunt.status === "active" ? "Pågår" : hunt.status === "paused" ? "Pausad" : "Avslutad"}
+            {hunt.status === "draft" ? "Utkast" : hunt.status === "active" ? "Pågår" : hunt.status === "paused" ? "Pausad" : "Avslutad"}
           </p>
           <HostTabs huntId={hunt.id} />
         </div>

@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { AGE_GROUPS, DIFFICULTIES, GAME_MODES, PLAN_LIMITS, TEMPLATES, THEMES, WIN_MODES, templateById } from "@/lib/catalog";
+import { AGE_GROUPS, DIFFICULTIES, GAME_MODES, LIMITS, TEMPLATES, THEMES, WIN_MODES, templateById } from "@/lib/catalog";
 import type { HuntInput } from "@/lib/hunts";
-import type { Plan } from "@/lib/types";
 
 export const DEFAULT_HUNT_INPUT: HuntInput = {
   name: "",
@@ -14,7 +13,6 @@ export const DEFAULT_HUNT_INPUT: HuntInput = {
   ageGroup: "child",
   themes: ["mixed"],
   difficulty: "easy",
-  plan: "paid",
   clueCount: 10,
   winMode: "points",
   startMode: "staggered",
@@ -66,20 +64,7 @@ export function HuntForm({
 }) {
   const [v, setV] = useState<HuntInput>(initial);
   const set = <K extends keyof HuntInput>(key: K, value: HuntInput[K]) => setV((prev) => ({ ...prev, [key]: value }));
-  const limits = PLAN_LIMITS[v.plan];
-  const paidOnly = v.plan === "free" ? " (betald)" : "";
-
-  const setPlan = (plan: Plan) => {
-    const l = PLAN_LIMITS[plan];
-    setV((prev) => ({
-      ...prev,
-      plan,
-      clueCount: mode === "create" ? l.defaultClues : prev.clueCount,
-      template: l.templates ? prev.template : "none",
-      gameMode: l.gameModes.includes(prev.gameMode) ? prev.gameMode : "classic",
-      allowPhotos: l.photos ? prev.allowPhotos : false,
-    }));
-  };
+  const limits = LIMITS;
 
   const setTemplate = (id: HuntInput["template"]) => {
     const tpl = templateById(id);
@@ -104,28 +89,11 @@ export function HuntForm({
       <section className="card">
         <h2>Grunderna</h2>
         <div className="field">
-          <span>Plan</span>
-          <Choice
-            value={v.plan}
-            disabled={locked}
-            options={[
-              { id: "free", label: "Gratis" },
-              { id: "paid", label: "Betald" },
-            ]}
-            onChange={setPlan}
-          />
-          <small>
-            {v.plan === "free"
-              ? "Gratis: max 3 ledtrådar, 2 lag och en aktiv jakt. Mallar, uppdrag, lagbild och diplom finns i betald."
-              : "Betald: 10 ledtrådar som standard, mallar, uppdrag, lagbild och diplom. (Ingen betalning i MVP – det är ett internt läge.)"}
-          </small>
-        </div>
-        <div className="field">
           <span>Mall</span>
           <Choice
             value={v.template}
             disabled={locked}
-            options={TEMPLATES.map((tpl) => ({ id: tpl.id, label: tpl.label + (tpl.id !== "none" ? paidOnly : ""), disabled: tpl.id !== "none" && !limits.templates }))}
+            options={TEMPLATES.map((tpl) => ({ id: tpl.id, label: tpl.label, disabled: tpl.id !== "none" && !limits.templates }))}
             onChange={setTemplate}
           />
           <small>{templateById(v.template).description}</small>
@@ -149,7 +117,7 @@ export function HuntForm({
             disabled={locked}
             options={GAME_MODES.map((g) => ({
               id: g.id,
-              label: g.label + (g.available ? (limits.gameModes.includes(g.id) ? "" : paidOnly) : " (snart)"),
+              label: g.label + (g.available ? "" : " (snart)"),
               disabled: !g.available || !limits.gameModes.includes(g.id),
             }))}
             onChange={(x) => set("gameMode", x)}
@@ -185,7 +153,7 @@ export function HuntForm({
               style={{ maxWidth: 120 }}
             />
             <small>
-              {v.plan === "free" ? "Max 3 i gratisläget." : "10 är standard. Du kan lägga till eller ta bort ledtrådar senare."} Plus en slutlig skatt.
+              10 är standard. Du kan lägga till eller ta bort ledtrådar senare. Plus en slutlig skatt.
             </small>
           </label>
         )}
@@ -227,7 +195,7 @@ export function HuntForm({
             value={v.allowPhotos ? "on" : "off"}
             disabled={locked || !limits.photos}
             options={[
-              { id: "on", label: "Tillåt bild" + paidOnly },
+              { id: "on", label: "Tillåt bild" },
               { id: "off", label: "Bara avatarer" },
             ]}
             onChange={(x) => set("allowPhotos", x === "on")}

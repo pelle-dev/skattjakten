@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Diploma } from "@/components/Diploma";
 import { PrintButton } from "@/app/hunt/[id]/print/PrintButton";
-import { PLAN_LIMITS } from "@/lib/catalog";
+import { LIMITS } from "@/lib/catalog";
 import { ranking } from "@/lib/game";
 import { t } from "@/lib/i18n";
 import { isHost, playerCredentials } from "@/lib/session";
@@ -25,10 +25,10 @@ export default async function DiplomaPage({ params }: { params: Promise<{ huntId
       </main>
     );
   }
-  if (!PLAN_LIMITS[hunt.plan].diploma) {
+  if (!LIMITS.diploma) {
     return (
       <main className="page center">
-        <p>Diplom finns i betalt läge.</p>
+        <p>Diplom är avstängda.</p>
       </main>
     );
   }
