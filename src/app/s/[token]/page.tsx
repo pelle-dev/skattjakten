@@ -22,25 +22,24 @@ export default async function ScanPage({ params }: { params: Promise<{ token: st
         <main className="page">
           <div className="card center">
             <div style={{ fontSize: "3rem" }}>🧭</div>
-            <h1>Okänd QR-kod</h1>
-            <p className="muted">Den här QR-koden hör inte till någon skattjakt.</p>
+            <h1>Den här QR-koden känner vi inte igen</h1>
+            <p className="muted">Den hör inte till någon skattjakt. Kolla att ni scannar rätt lapp.</p>
           </div>
         </main>
       </>
     );
   }
 
-  const sv = hunt.language === "sv";
-  const label = cp ? `${sv ? "Kontrollpunkt" : "Checkpoint"} ${cp.order + 1}` : sv ? "Skatten" : "The treasure";
+  const label = cp ? `Kontrollpunkt ${cp.order + 1}` : "Skatten";
   const creds = await playerCredentials(hunt.id);
   const joined = !!creds && db.participants.some((p) => p.id === creds.id && p.token === creds.token);
 
-  if (joined) return <ScanLanding huntId={hunt.id} token={token} lang={hunt.language} brand={hunt.brandName} />;
+  if (joined) return <ScanLanding huntId={hunt.id} token={token} />;
 
   const host = await isHost(hunt);
   return (
     <>
-      <TopBar brand={hunt.brandName} />
+      <TopBar />
       <main className="page">
         <div className="card center">
           <div style={{ fontSize: "3rem" }}>{cp ? "📍" : "💎"}</div>
@@ -58,9 +57,9 @@ export default async function ScanPage({ params }: { params: Promise<{ token: st
           ) : (
             <>
               <h1>{hunt.name}</h1>
-              <p>{sv ? "Du är inte med i den här skattjakten ännu." : "You haven't joined this trail yet."}</p>
+              <p>Du är inte med i den här skattjakten ännu.</p>
               <Link href={`/join/${hunt.joinCode}`} className="btn primary">
-                {sv ? "Gå med först" : "Join first"}
+                Gå med först
               </Link>
             </>
           )}

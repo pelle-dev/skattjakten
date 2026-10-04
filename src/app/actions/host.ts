@@ -142,7 +142,7 @@ export async function aiClueAction(huntId: string, req: { placementNote: string;
     if (!req.placementNote.trim()) throw new UserError("Skriv först var QR-koden ska placeras.");
     await mutate((db) => useAiQuota(db, huntId));
     try {
-      return await suggestClue({ ...req, language: hunt.language, ageGroup: hunt.ageGroup, themes: hunt.themes });
+      return await suggestClue({ ...req, ageGroup: hunt.ageGroup, themes: hunt.themes });
     } catch (err) {
       console.error(err);
       throw new UserError("AI-förslaget misslyckades. Försök igen eller skriv en egen ledtråd.");
@@ -155,7 +155,7 @@ export async function aiHelpAction(huntId: string, req: { placementNote: string;
     const hunt = await hostFor("hunt", huntId);
     await mutate((db) => useAiQuota(db, huntId));
     try {
-      return await suggestHelp({ ...req, language: hunt.language });
+      return await suggestHelp(req);
     } catch (err) {
       console.error(err);
       throw new UserError("AI-förslaget misslyckades. Försök igen eller skriv en egen hjälptext.");
@@ -179,7 +179,6 @@ export async function aiQuestionsAction(checkpointId: string, replaceQuestionId?
     try {
       generated = await generateQuestions({
         count,
-        language: hunt.language,
         ageGroup: hunt.ageGroup,
         themes: hunt.themes,
         focus: templateById(hunt.template).focus,

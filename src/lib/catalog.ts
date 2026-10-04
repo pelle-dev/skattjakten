@@ -1,6 +1,4 @@
-import type { AgeGroup, Difficulty, GameMode, Language, Plan, ScoringRules, TemplateId, WinMode } from "./types";
-
-export type Text = Record<Language, string>;
+import type { AgeGroup, Difficulty, GameMode, Plan, ScoringRules, TemplateId, WinMode } from "./types";
 
 export const DEFAULT_SCORING: ScoringRules = {
   checkpointFound: 4,
@@ -59,173 +57,173 @@ export const PLAN_LABEL: Record<Plan, string> = { free: "Gratis", paid: "Betald"
 
 // ---------------------------------------------------------------------------
 
-export const GAME_MODES: { id: GameMode; label: Text; description: string; available: boolean }[] = [
-  { id: "classic", label: { sv: "Klassisk skattjakt", en: "Classic treasure trail" }, description: "Alla följer samma ledtrådskedja fram till skatten.", available: true },
-  { id: "calm", label: { sv: "Lugn jakt", en: "Calm trail" }, description: "Samma kedja, utan klocka och med extra tydliga steg.", available: true },
-  { id: "teamBattle", label: { sv: "Lagkamp", en: "Team battle" }, description: "Flera lag tävlar i samma jakt, gärna med startintervall.", available: true },
-  { id: "pointHunt", label: { sv: "Poängjakt", en: "Point hunt" }, description: "Hitta punkter i valfri ordning. Kommer senare.", available: false },
+export const GAME_MODES: { id: GameMode; label: string; description: string; available: boolean }[] = [
+  { id: "classic", label: "Klassisk skattjakt", description: "Alla följer samma ledtrådskedja fram till skatten.", available: true },
+  { id: "calm", label: "Lugn jakt", description: "Samma kedja, utan klocka och med extra tydliga steg.", available: true },
+  { id: "teamBattle", label: "Lagkamp", description: "Flera lag tävlar i samma jakt, gärna med startintervall.", available: true },
+  { id: "pointHunt", label: "Poängjakt", description: "Hitta punkter i valfri ordning. Kommer senare.", available: false },
 ];
 
-export const WIN_MODES: { id: WinMode; label: Text; description: string }[] = [
-  { id: "fastest", label: { sv: "Snabbast vinner", en: "Fastest wins" }, description: "Tiden räknas från varje lags egen starttid." },
-  { id: "points", label: { sv: "Flest poäng vinner", en: "Most points wins" }, description: "Vid lika poäng vinner den som hittade skatten snabbast." },
+export const WIN_MODES: { id: WinMode; label: string; description: string }[] = [
+  { id: "fastest", label: "Snabbast vinner", description: "Tiden räknas från varje lags egen starttid." },
+  { id: "points", label: "Flest poäng vinner", description: "Vid lika poäng vinner den som hittade skatten snabbast." },
 ];
 
-export const AGE_GROUPS: { id: AgeGroup; label: Text }[] = [
-  { id: "child", label: { sv: "Barn", en: "Children" } },
-  { id: "youth", label: { sv: "Ungdom", en: "Youth" } },
-  { id: "adult", label: { sv: "Vuxen", en: "Adults" } },
+export const AGE_GROUPS: { id: AgeGroup; label: string }[] = [
+  { id: "child", label: "Barn" },
+  { id: "youth", label: "Ungdom" },
+  { id: "adult", label: "Vuxen" },
 ];
 
-export const DIFFICULTIES: { id: Difficulty; label: Text }[] = [
-  { id: "easy", label: { sv: "Enkel", en: "Easy" } },
-  { id: "medium", label: { sv: "Medel", en: "Medium" } },
-  { id: "tricky", label: { sv: "Klurig", en: "Tricky" } },
+export const DIFFICULTIES: { id: Difficulty; label: string }[] = [
+  { id: "easy", label: "Enkel" },
+  { id: "medium", label: "Medel" },
+  { id: "tricky", label: "Klurig" },
 ];
 
-export const THEMES: { id: string; label: Text }[] = [
-  { id: "animals", label: { sv: "Djur", en: "Animals" } },
-  { id: "nature", label: { sv: "Natur", en: "Nature" } },
-  { id: "sports", label: { sv: "Sport", en: "Sports" } },
-  { id: "music", label: { sv: "Musik", en: "Music" } },
-  { id: "film", label: { sv: "Film", en: "Film" } },
-  { id: "history", label: { sv: "Historia", en: "History" } },
-  { id: "geography", label: { sv: "Geografi", en: "Geography" } },
-  { id: "space", label: { sv: "Rymden", en: "Space" } },
-  { id: "puzzles", label: { sv: "Klurigheter", en: "Brain teasers" } },
-  { id: "fairytales", label: { sv: "Sagor", en: "Fairy tales" } },
-  { id: "pirates", label: { sv: "Pirater", en: "Pirates" } },
-  { id: "mystery", label: { sv: "Mysterium", en: "Mystery" } },
-  { id: "family", label: { sv: "Familj", en: "Family" } },
-  { id: "mixed", label: { sv: "Blandat", en: "Mixed" } },
+export const THEMES: { id: string; label: string }[] = [
+  { id: "animals", label: "Djur" },
+  { id: "nature", label: "Natur" },
+  { id: "sports", label: "Sport" },
+  { id: "music", label: "Musik" },
+  { id: "film", label: "Film" },
+  { id: "history", label: "Historia" },
+  { id: "geography", label: "Geografi" },
+  { id: "space", label: "Rymden" },
+  { id: "puzzles", label: "Klurigheter" },
+  { id: "fairytales", label: "Sagor" },
+  { id: "pirates", label: "Pirater" },
+  { id: "mystery", label: "Mysterium" },
+  { id: "family", label: "Familj" },
+  { id: "mixed", label: "Blandat" },
 ];
 
-export const themeLabel = (id: string, lang: Language) => THEMES.find((t) => t.id === id)?.label[lang] ?? id;
+export const themeLabel = (id: string) => THEMES.find((t) => t.id === id)?.label ?? id;
 
 // ---------------------------------------------------------------------------
 // Mallar
 
 export interface Template {
   id: TemplateId;
-  label: Text;
+  label: string;
   description: string;
   themes: string[];
   ageGroup: AgeGroup;
   difficulty: Difficulty;
   /** Tema som AI-frågorna ska få extra fokus på. */
   focus: string[];
-  missions: Text[];
-  treasureClue: Text;
+  missions: string[];
+  treasureClue: string;
 }
 
-export const MISSION_EXAMPLES: Text[] = [
-  { sv: "Ta en lagbild där alla gör tummen upp.", en: "Take a team photo with everyone giving a thumbs up." },
-  { sv: "Hitta något grönt innan ni går vidare.", en: "Find something green before you move on." },
-  { sv: "Gör en high-five med alla i laget.", en: "High-five everyone in your team." },
-  { sv: "Räkna hur många fönster ni ser från platsen.", en: "Count how many windows you can see from here." },
-  { sv: "Hitta något runt.", en: "Find something round." },
-  { sv: "Hitta något som börjar på bokstaven S.", en: "Find something that starts with the letter S." },
-  { sv: "Alla i laget ska säga en sak de är bra på.", en: "Everyone in the team says one thing they are good at." },
-  { sv: "Gör en konstig grimas.", en: "Make a funny face." },
-  { sv: "Hitta något som låter.", en: "Find something that makes a sound." },
-  { sv: "Gå tio steg bakåt och titta igen.", en: "Walk ten steps backwards and look again." },
+export const MISSION_EXAMPLES: string[] = [
+  "Ta en lagbild där alla gör tummen upp.",
+  "Hitta något grönt innan ni går vidare.",
+  "Gör en high-five med alla i laget.",
+  "Räkna hur många fönster ni ser från platsen.",
+  "Hitta något runt.",
+  "Hitta något som börjar på bokstaven S.",
+  "Alla i laget ska säga en sak de är bra på.",
+  "Gör en konstig grimas.",
+  "Hitta något som låter.",
+  "Gå tio steg bakåt och titta igen.",
 ];
 
 export const TEMPLATES: Template[] = [
   {
     id: "none",
-    label: { sv: "Ingen mall", en: "No template" },
+    label: "Ingen mall",
     description: "Börja från början.",
     themes: ["mixed"],
     ageGroup: "child",
     difficulty: "easy",
     focus: [],
     missions: MISSION_EXAMPLES,
-    treasureClue: { sv: "Sista ledtråden leder till skatten!", en: "The last clue leads to the treasure!" },
+    treasureClue: "Sista ledtråden leder till skatten!",
   },
   {
     id: "birthday",
-    label: { sv: "Barnkalas", en: "Birthday party" },
+    label: "Barnkalas",
     description: "Lekfull jakt med korta ledtrådar, enkla frågor, roliga uppdrag och diplom efteråt.",
     themes: ["animals", "fairytales"],
     ageGroup: "child",
     difficulty: "easy",
     focus: ["kalas", "lekar", "djur"],
     missions: [MISSION_EXAMPLES[2], MISSION_EXAMPLES[7], MISSION_EXAMPLES[1], MISSION_EXAMPLES[0], MISSION_EXAMPLES[4]],
-    treasureClue: { sv: "Skatten väntar där kalaset började. Leta där ni brukar öppna paket!", en: "The treasure waits where the party began. Look where presents get opened!" },
+    treasureClue: "Skatten väntar där kalaset började. Leta där ni brukar öppna paket!",
   },
   {
     id: "easter",
-    label: { sv: "Påskägg", en: "Easter egg" },
+    label: "Påskägg",
     description: "Påsk, vår, godis och gömda ägg. Slutskatten är ett påskägg.",
     themes: ["nature", "family"],
     ageGroup: "child",
     difficulty: "easy",
     focus: ["påsk", "vår", "ägg", "kycklingar", "godis"],
     missions: [
-      { sv: "Hoppa som en påskhare tio gånger.", en: "Hop like an Easter bunny ten times." },
-      { sv: "Hitta något gult, som en kyckling.", en: "Find something yellow, like a chick." },
+      "Hoppa som en påskhare tio gånger.",
+      "Hitta något gult, som en kyckling.",
       MISSION_EXAMPLES[2],
-      { sv: "Kackla som en höna allihop!", en: "Everyone cluck like a hen!" },
+      "Kackla som en höna allihop!",
     ],
-    treasureClue: { sv: "Påskharen har gömt det stora ägget. Leta där ni hittar vårens första blomma!", en: "The Easter bunny hid the big egg. Look where spring's first flower grows!" },
+    treasureClue: "Påskharen har gömt det stora ägget. Leta där ni hittar vårens första blomma!",
   },
   {
     id: "midsummer",
-    label: { sv: "Midsommar", en: "Midsummer" },
+    label: "Midsommar",
     description: "Sommar, natur, blommor, lekar och familj.",
     themes: ["nature", "family"],
     ageGroup: "child",
     difficulty: "easy",
     focus: ["sommar", "blommor", "midsommar", "lekar"],
     missions: [
-      { sv: "Plocka (eller hitta) tre olika blommor.", en: "Find three different flowers." },
-      { sv: "Gör små grodorna-hoppet tre gånger.", en: "Do the little frogs jump three times." },
+      "Plocka (eller hitta) tre olika blommor.",
+      "Gör små grodorna-hoppet tre gånger.",
       MISSION_EXAMPLES[1],
       MISSION_EXAMPLES[6],
     ],
-    treasureClue: { sv: "Där stången står när vi dansar, finns er skatt.", en: "Where the maypole stands when we dance, your treasure is found." },
+    treasureClue: "Där stången står när vi dansar, finns er skatt.",
   },
   {
     id: "schoolyard",
-    label: { sv: "Skolgården", en: "Schoolyard" },
+    label: "Skolgården",
     description: "För skola, fritids eller förening. Samarbete, tydliga instruktioner och låg stress.",
     themes: ["mixed", "nature"],
     ageGroup: "child",
     difficulty: "easy",
     focus: ["samarbete", "skola", "kunskap"],
     missions: [MISSION_EXAMPLES[6], MISSION_EXAMPLES[3], MISSION_EXAMPLES[5], MISSION_EXAMPLES[2]],
-    treasureClue: { sv: "Där ni ställer upp er efter rasten finns skatten.", en: "Where you line up after break, the treasure is waiting." },
+    treasureClue: "Där ni ställer upp er efter rasten finns skatten.",
   },
   {
     id: "corporate",
-    label: { sv: "Företagsevent", en: "Corporate event" },
+    label: "Företagsevent",
     description: "Kickoff, mässa eller företagsaktivitet. Lagarbete och stationer.",
     themes: ["mixed", "puzzles"],
     ageGroup: "adult",
     difficulty: "medium",
     focus: ["lagarbete", "företag", "kunskap"],
     missions: [
-      { sv: "Ta en lagbild med något i företagets färg.", en: "Take a team photo with something in the company colour." },
+      "Ta en lagbild med något i företagets färg.",
       MISSION_EXAMPLES[6],
-      { sv: "Hitta någon utanför laget och säg hej.", en: "Find someone outside your team and say hello." },
+      "Hitta någon utanför laget och säg hej.",
     ],
-    treasureClue: { sv: "Där dagen startade och kaffet serverades, väntar skatten.", en: "Where the day started and coffee was served, the treasure awaits." },
+    treasureClue: "Där dagen startade och kaffet serverades, väntar skatten.",
   },
   {
     id: "candy",
-    label: { sv: "Godisjakten", en: "Candy hunt" },
+    label: "Godisjakten",
     description: "En enkel och rolig jakt där slutmålet är godis. Snabb start.",
     themes: ["family", "animals"],
     ageGroup: "child",
     difficulty: "easy",
     focus: ["godis", "färger", "smaker"],
     missions: [
-      { sv: "Hitta något som har samma färg som ert favoritgodis.", en: "Find something the same colour as your favourite candy." },
+      "Hitta något som har samma färg som ert favoritgodis.",
       MISSION_EXAMPLES[2],
       MISSION_EXAMPLES[7],
     ],
-    treasureClue: { sv: "Godiset finns där det är svalt och mörkt. Titta där maten sover!", en: "The candy is where it is cool and dark. Look where the food sleeps!" },
+    treasureClue: "Godiset finns där det är svalt och mörkt. Titta där maten sover!",
   },
 ];
 
@@ -237,31 +235,39 @@ export const templateById = (id: TemplateId) => TEMPLATES.find((t) => t.id === i
 export interface Avatar {
   id: string;
   emoji: string;
-  label: Text;
+  label: string;
   color: string;
 }
 
 export const TEAM_AVATARS: Avatar[] = [
-  { id: "foxes", emoji: "🦊", label: { sv: "Rävarna", en: "The Foxes" }, color: "#f6a04d" },
-  { id: "bears", emoji: "🐻", label: { sv: "Björnarna", en: "The Bears" }, color: "#b07a4f" },
-  { id: "owls", emoji: "🦉", label: { sv: "Ugglorna", en: "The Owls" }, color: "#8d7bd8" },
-  { id: "dragons", emoji: "🐉", label: { sv: "Drakarna", en: "The Dragons" }, color: "#4cb782" },
-  { id: "stars", emoji: "⭐", label: { sv: "Stjärnorna", en: "The Stars" }, color: "#f2c94c" },
-  { id: "lightning", emoji: "⚡", label: { sv: "Blixtarna", en: "The Lightnings" }, color: "#56a8f5" },
-  { id: "pirates", emoji: "🏴‍☠️", label: { sv: "Piraterna", en: "The Pirates" }, color: "#555c6e" },
-  { id: "unicorns", emoji: "🦄", label: { sv: "Enhörningarna", en: "The Unicorns" }, color: "#ef8fc4" },
+  { id: "foxes", emoji: "🦊", label: "Rävarna", color: "#FBDDBF" },
+  { id: "bears", emoji: "🐻", label: "Björnarna", color: "#EADBC8" },
+  { id: "owls", emoji: "🦉", label: "Ugglorna", color: "#E9E4FF" },
+  { id: "dragons", emoji: "🐉", label: "Drakarna", color: "#D3EADF" },
+  { id: "stars", emoji: "⭐", label: "Stjärnorna", color: "#FBEBB5" },
+  { id: "lightning", emoji: "⚡", label: "Blixtarna", color: "#D9F0F2" },
+  { id: "rabbits", emoji: "🐰", label: "Kaninerna", color: "#F7E1EA" },
+  { id: "squirrels", emoji: "🐿️", label: "Ekorrarna", color: "#FCDCD6" },
+  { id: "comets", emoji: "☄️", label: "Kometerna", color: "#E9E4FF" },
+  { id: "explorers", emoji: "🧭", label: "Upptäckarna", color: "#D3EADF" },
+];
+
+// Avatarer som inte längre går att välja, men som lag skapade tidigare kan ha.
+const OLD_AVATARS: Avatar[] = [
+  { id: "pirates", emoji: "🦜", label: "Piraterna", color: "#D9F0F2" },
+  { id: "unicorns", emoji: "🦄", label: "Enhörningarna", color: "#E9E4FF" },
 ];
 
 export const PERSON_AVATARS: Avatar[] = [
-  { id: "cat", emoji: "🐱", label: { sv: "Katt", en: "Cat" }, color: "#f6a04d" },
-  { id: "dog", emoji: "🐶", label: { sv: "Hund", en: "Dog" }, color: "#b07a4f" },
-  { id: "rabbit", emoji: "🐰", label: { sv: "Kanin", en: "Rabbit" }, color: "#ef8fc4" },
-  { id: "panda", emoji: "🐼", label: { sv: "Panda", en: "Panda" }, color: "#555c6e" },
-  { id: "frog", emoji: "🐸", label: { sv: "Groda", en: "Frog" }, color: "#4cb782" },
-  { id: "lion", emoji: "🦁", label: { sv: "Lejon", en: "Lion" }, color: "#f2c94c" },
-  { id: "robot", emoji: "🤖", label: { sv: "Robot", en: "Robot" }, color: "#56a8f5" },
-  { id: "astronaut", emoji: "🧑‍🚀", label: { sv: "Astronaut", en: "Astronaut" }, color: "#8d7bd8" },
+  { id: "cat", emoji: "🐱", label: "Katt", color: "#FBDDBF" },
+  { id: "dog", emoji: "🐶", label: "Hund", color: "#EADBC8" },
+  { id: "rabbit", emoji: "🐰", label: "Kanin", color: "#F7E1EA" },
+  { id: "panda", emoji: "🐼", label: "Panda", color: "#E4E9EC" },
+  { id: "frog", emoji: "🐸", label: "Groda", color: "#D3EADF" },
+  { id: "lion", emoji: "🦁", label: "Lejon", color: "#FBEBB5" },
+  { id: "robot", emoji: "🤖", label: "Robot", color: "#D9F0F2" },
+  { id: "astronaut", emoji: "🧑‍🚀", label: "Astronaut", color: "#E9E4FF" },
 ];
 
-export const ALL_AVATARS = [...TEAM_AVATARS, ...PERSON_AVATARS];
+export const ALL_AVATARS = [...TEAM_AVATARS, ...PERSON_AVATARS, ...OLD_AVATARS];
 export const avatarById = (id: string | null | undefined) => ALL_AVATARS.find((a) => a.id === id) ?? null;

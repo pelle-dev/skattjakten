@@ -50,7 +50,6 @@ describe("Testjakten", () => {
   it("1–3: jakten skapas med QR-koder, frågor, uppdrag och placeringslista", () => {
     const { db, hunt } = setup();
     expect(hunt.name).toBe("Testjakten");
-    expect(hunt.language).toBe("sv");
     expect(hunt.template).toBe("birthday");
     expect(hunt.gameMode).toBe("classic");
     expect(hunt.playMode).toBe("team");
@@ -213,7 +212,6 @@ describe("Testjakten", () => {
     const db = emptyDb();
     const hunt = createHunt(db, {
       name: "Gratis",
-      language: "sv",
       description: "",
       template: "birthday",
       gameMode: "calm",

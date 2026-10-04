@@ -25,7 +25,6 @@ export default async function DiplomaPage({ params }: { params: Promise<{ huntId
       </main>
     );
   }
-  const lang = hunt.language;
   if (!PLAN_LIMITS[hunt.plan].diploma) {
     return (
       <main className="page center">
@@ -41,11 +40,9 @@ export default async function DiplomaPage({ params }: { params: Promise<{ huntId
         <Link href={backHref} className="btn">
           ←
         </Link>
-        <PrintButton label={`🖨️ ${t(lang, "print")}`} />
+        <PrintButton label={`🖨️ ${t("print")}`} />
       </div>
       <Diploma
-        lang={lang}
-        brandName={hunt.brandName}
         huntName={hunt.name}
         teamName={team.name}
         individual={hunt.playMode === "individual"}

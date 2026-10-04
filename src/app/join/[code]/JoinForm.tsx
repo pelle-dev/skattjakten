@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Avatar } from "@/components/Avatar";
 import { AvatarPicker } from "@/components/AvatarPicker";
+import { BrandSymbol } from "@/components/Brand";
 import { TopBar } from "@/components/TopBar";
 import { TEAM_AVATARS } from "@/lib/catalog";
 import { t } from "@/lib/i18n";
@@ -42,17 +43,21 @@ export function JoinForm({ code }: { code: string }) {
           <div className="card center">
             <p className="big">{error}</p>
             <a className="btn primary" href="/join">
-              Försök igen
+              Skriv koden igen
             </a>
           </div>
         </main>
       </>
     );
-  if (!info) return <main className="page muted">…</main>;
+  if (!info)
+    return (
+      <main className="page center loading">
+        <BrandSymbol width={140} />
+        <p className="muted">Hämtar skattjakten…</p>
+      </main>
+    );
 
-  const lang = info.language;
   const isTeam = info.playMode === "team";
-  const sv = lang === "sv";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,11 +77,11 @@ export function JoinForm({ code }: { code: string }) {
 
   return (
     <>
-      <TopBar brand={info.brandName} />
+      <TopBar />
       <main className="page">
         <section className="card gold center">
           <p className="muted" style={{ margin: 0 }}>
-            {t(lang, "joinTitle")}
+            {t("joinTitle")}
           </p>
           <h1 style={{ margin: "4px 0 0" }}>{info.name}</h1>
         </section>
@@ -86,7 +91,7 @@ export function JoinForm({ code }: { code: string }) {
             <div className="row" style={{ marginBottom: 16 }}>
               <Avatar avatarId={info.team.avatarId} size={56} />
               <div>
-                <div className="muted small">{t(lang, "team")}</div>
+                <div className="muted small">{t("team")}</div>
                 <strong className="big">{info.team.name}</strong>
               </div>
             </div>
@@ -94,10 +99,10 @@ export function JoinForm({ code }: { code: string }) {
             isTeam && (
               <div className="chips" style={{ marginBottom: 16 }}>
                 <button type="button" className={`chip ${mode === "new" ? "on" : ""}`} onClick={() => setMode("new")}>
-                  {sv ? "Nytt lag" : "New team"}
+                  Nytt lag
                 </button>
                 <button type="button" className={`chip ${mode === "existing" ? "on" : ""}`} onClick={() => setMode("existing")}>
-                  {t(lang, "joinExistingTeam")}
+                  {t("joinExistingTeam")}
                 </button>
               </div>
             )
@@ -105,35 +110,34 @@ export function JoinForm({ code }: { code: string }) {
 
           {mode === "existing" && !info.team && (
             <label className="field">
-              <span>{t(lang, "teamCode")}</span>
+              <span>{t("teamCode")}</span>
               <input className="code-input" value={teamCode} onChange={(e) => setTeamCode(e.target.value)} required maxLength={8} />
             </label>
           )}
 
           {mode === "new" && isTeam && (
             <label className="field">
-              <span>{t(lang, "teamName")}</span>
-              <input value={teamName} onChange={(e) => setTeamName(e.target.value)} required maxLength={40} placeholder={sv ? "T.ex. Rävarna" : "e.g. The Foxes"} />
+              <span>{t("teamName")}</span>
+              <input value={teamName} onChange={(e) => setTeamName(e.target.value)} required maxLength={40} placeholder="T.ex. Rävarna" />
             </label>
           )}
 
           <label className="field">
-            <span>{t(lang, "yourName")}</span>
+            <span>{t("yourName")}</span>
             <input value={playerName} onChange={(e) => setPlayerName(e.target.value)} required={!isTeam || mode === "existing"} maxLength={40} />
           </label>
 
           {mode === "new" && (
             <div className="field">
-              <span style={{ display: "block", fontWeight: 700, marginBottom: 8 }}>{t(lang, "chooseLook")}</span>
+              <span style={{ display: "block", fontWeight: 700, marginBottom: 8 }}>{t("chooseLook")}</span>
               <AvatarPicker
-                lang={lang}
                 kind={isTeam ? "team" : "person"}
                 avatarId={look.avatarId}
                 photoUrl={look.photoUrl}
                 allowPhoto={info.allowPhotos}
                 onChange={(v) => {
                   setLook(v);
-                  const label = TEAM_AVATARS.find((a) => a.id === v.avatarId)?.label[lang];
+                  const label = TEAM_AVATARS.find((a) => a.id === v.avatarId)?.label;
                   if (isTeam && !teamName && label) setTeamName(label);
                 }}
               />
@@ -141,7 +145,7 @@ export function JoinForm({ code }: { code: string }) {
           )}
 
           <button className="btn primary huge" disabled={busy} style={{ marginTop: 12 }}>
-            {t(lang, "start")}
+            {t("start")}
           </button>
         </form>
       </main>

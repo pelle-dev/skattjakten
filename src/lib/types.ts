@@ -1,9 +1,7 @@
-// Datamodellen för Skattjakten / Treasure Trail.
+// Datamodellen för Skattjakten.
 // Tekniskt kallas en ledtrådsplats för "Checkpoint", även om appen visar ordet "ledtråd".
 // Modellen är platt (som tabeller) så att den enkelt kan flyttas till Supabase/Postgres senare.
 
-export type Language = "sv" | "en";
-export type BrandName = "Skattjakten" | "Treasure Trail";
 export type HuntStatus = "draft" | "active" | "paused" | "finished";
 export type PlayMode = "individual" | "team";
 export type GameMode = "classic" | "calm" | "teamBattle" | "pointHunt";
@@ -38,8 +36,6 @@ export interface PauseInterval {
 export interface Hunt {
   id: string;
   name: string;
-  language: Language;
-  brandName: BrandName;
   description: string;
   template: TemplateId;
   gameMode: GameMode;

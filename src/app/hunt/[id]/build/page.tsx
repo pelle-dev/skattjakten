@@ -167,7 +167,6 @@ function CheckpointEditor({
   const [variant, setVariant] = useState(0);
   const [mission, setMission] = useState(cp.mission?.missionText ?? "");
   const huntId = bundle.hunt.id;
-  const lang = bundle.hunt.language;
 
   const save = async (patch: Partial<typeof form>) => {
     const res = await updateCheckpointAction(cp.id, patch);
@@ -236,7 +235,7 @@ function CheckpointEditor({
                     save({ difficulty: d.id });
                   }}
                 >
-                  {d.label.sv}
+                  {d.label}
                 </button>
               ))}
             </div>
@@ -331,7 +330,6 @@ function CheckpointEditor({
               {draft && (
                 <div className="chips" style={{ marginBottom: 14 }}>
                   {[...templateById(bundle.hunt.template).missions, ...MISSION_EXAMPLES]
-                    .map((m) => m[lang])
                     .filter((m, i, all) => all.indexOf(m) === i)
                     .slice(0, 10)
                     .map((m) => (
@@ -503,7 +501,7 @@ function QuestionEditor({
   };
 
   return (
-    <div className="card" style={{ background: q && !q.approvedByHost ? "var(--accent-soft)" : "#fbfaf7", boxShadow: "none" }}>
+    <div className="card" style={{ background: q && !q.approvedByHost ? "var(--accent-soft)" : "var(--molnvit)", boxShadow: "none" }}>
       <div className="row between" style={{ marginBottom: 8 }}>
         <strong>Fråga {index + 1}</strong>
         <span className="row">

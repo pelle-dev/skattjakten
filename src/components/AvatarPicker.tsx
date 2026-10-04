@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { PERSON_AVATARS, TEAM_AVATARS } from "@/lib/catalog";
-import type { Language } from "@/lib/types";
 import { t } from "@/lib/i18n";
 import { Avatar } from "./Avatar";
 
@@ -28,14 +27,12 @@ async function shrinkImage(file: File, size = 320): Promise<string> {
 }
 
 export function AvatarPicker({
-  lang,
   kind,
   avatarId,
   photoUrl,
   allowPhoto,
   onChange,
 }: {
-  lang: Language;
   kind: "team" | "person";
   avatarId: string | null;
   photoUrl: string | null;
@@ -57,7 +54,7 @@ export function AvatarPicker({
             onClick={() => onChange({ avatarId: a.id, photoUrl: null })}
           >
             <Avatar avatarId={a.id} size={44} />
-            {a.label[lang]}
+            {a.label}
           </button>
         ))}
       </div>
@@ -83,18 +80,18 @@ export function AvatarPicker({
             }}
           />
           <button type="button" className="btn" disabled={busy} onClick={() => fileRef.current?.click()}>
-            📷 {t(lang, "choosePhoto")}
+            📷 {t("choosePhoto")}
           </button>
           {photoUrl && (
             <button type="button" className="btn ghost small" onClick={() => onChange({ avatarId, photoUrl: null })}>
-              {t(lang, "removePhoto")}
+              {t("removePhoto")}
             </button>
           )}
         </div>
       )}
-      {allowPhoto && <p className="muted small">{t(lang, "photoPrivate")}</p>}
-      <button type="button" className={`btn ghost small ${!avatarId && !photoUrl ? "" : ""}`} onClick={() => onChange({ avatarId: null, photoUrl: null })}>
-        {t(lang, "skip")}
+      {allowPhoto && <p className="muted small">{t("photoPrivate")}</p>}
+      <button type="button" className="btn ghost small" onClick={() => onChange({ avatarId: null, photoUrl: null })}>
+        {t("skip")}
       </button>
     </div>
   );

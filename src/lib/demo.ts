@@ -44,7 +44,6 @@ export function createTestjakten(db: Db, now = new Date()): Hunt {
     db,
     {
       name: "Testjakten",
-      language: "sv",
       description: "Exempeljakt för att testa hela flödet: 3 ledtrådar, 2 lag och 2 minuters startintervall.",
       template: "birthday",
       gameMode: "classic",
