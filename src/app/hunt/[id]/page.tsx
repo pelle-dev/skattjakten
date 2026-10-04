@@ -1,6 +1,7 @@
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { validateHunt, checkpointsOf, teamsOf } from "@/lib/hunts";
-import { baseUrl } from "@/lib/session";
+import { baseUrl, hostHunt } from "@/lib/session";
 import { readDb } from "@/lib/store";
 import { CopyLink } from "./CopyLink";
 
@@ -9,7 +10,8 @@ export const dynamic = "force-dynamic";
 export default async function Overview({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const db = await readDb();
-  const hunt = db.hunts.find((h) => h.id === id)!;
+  const hunt = await hostHunt(db, id);
+  if (!hunt) notFound();
   const { errors, warnings } = validateHunt(db, id);
   const cps = checkpointsOf(db, id);
   const teams = teamsOf(db, id);

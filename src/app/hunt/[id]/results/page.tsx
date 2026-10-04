@@ -1,9 +1,11 @@
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { PLAN_LIMITS } from "@/lib/catalog";
 import { maxScore, ranking } from "@/lib/game";
 import { checkpointsOf } from "@/lib/hunts";
 import { formatDuration } from "@/lib/i18n";
+import { hostHunt } from "@/lib/session";
 import { readDb } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +13,8 @@ export const dynamic = "force-dynamic";
 export default async function ResultsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const db = await readDb();
-  const hunt = db.hunts.find((h) => h.id === id)!;
+  const hunt = await hostHunt(db, id);
+  if (!hunt) notFound();
   const rows = ranking(db, id);
   const total = checkpointsOf(db, id).length;
   const finished = hunt.status === "finished";

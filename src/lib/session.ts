@@ -3,6 +3,7 @@
 // - Deltagaren får en cookie per jakt med sitt deltagar-id och sin hemliga nyckel.
 
 import "server-only";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import type { Db, Hunt } from "./types";
 
@@ -10,7 +11,8 @@ const HOST_PREFIX = "sj_h_";
 const PLAYER_PREFIX = "sj_p_";
 const MAX_AGE = 60 * 60 * 24 * 90;
 
-const cookieOptions = { httpOnly: true, sameSite: "lax" as const, path: "/", maxAge: MAX_AGE };
+// secure: cookien skickas bara över https (utom lokalt, där appen körs på http).
+const cookieOptions = { httpOnly: true, secure: process.env.NODE_ENV === "production" && !!process.env.VERCEL, sameSite: "lax" as const, path: "/", maxAge: MAX_AGE };
 
 export async function setHostCookie(hunt: Hunt) {
   (await cookies()).set(HOST_PREFIX + hunt.id, hunt.hostKey, cookieOptions);
@@ -23,8 +25,33 @@ export async function hostHuntIds(): Promise<string[]> {
     .map((c) => c.name.slice(HOST_PREFIX.length));
 }
 
+/** Jämför hemliga nycklar utan att svarstiden avslöjar hur mycket som stämde. */
+export function sameSecret(given: string | null | undefined, expected: string): boolean {
+  if (!given || !expected) return false;
+  const a = Buffer.from(given);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 export async function isHost(hunt: Hunt): Promise<boolean> {
-  return (await cookies()).get(HOST_PREFIX + hunt.id)?.value === hunt.hostKey;
+  return sameSecret((await cookies()).get(HOST_PREFIX + hunt.id)?.value, hunt.hostKey);
+}
+
+/**
+ * Jakten om webbläsaren är dess skattgömmare, annars null.
+ * Varje värdsida måste själv anropa den här: layouten skyddar inte sidan,
+ * eftersom Next.js kan hämta en sida utan att köra layouten på nytt.
+ */
+export async function hostHunt(db: Db, huntId: string): Promise<Hunt | null> {
+  const hunt = db.hunts.find((h) => h.id === huntId);
+  return hunt && (await isHost(hunt)) ? hunt : null;
+}
+
+/** Ett anonymt id för den som anropar (hashad IP-adress), för att begränsa missbruk. */
+export async function clientKey(): Promise<string> {
+  const h = await headers();
+  const ip = h.get("x-real-ip") ?? h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  return createHash("sha256").update(`skattjakten:${ip}`).digest("base64url").slice(0, 22);
 }
 
 export async function setPlayerCookie(huntId: string, participantId: string, token: string) {
