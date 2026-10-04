@@ -1,6 +1,4 @@
-// Texter som deltagarna ser (styrs av jaktens språk). Skattgömmarens vyer är på svenska i MVP.
-
-import type { Language } from "./types";
+// Texter som deltagarna ser. Appen är bara på svenska.
 
 const sv = {
   appName: "Skattjakten",
@@ -93,99 +91,8 @@ const sv = {
 
 export type TextKey = keyof typeof sv;
 
-const en: Record<TextKey, string> = {
-  appName: "Treasure Trail",
-  join: "Join",
-  joinTitle: "Join a treasure trail",
-  joinCode: "Trail code",
-  teamCode: "Team code",
-  joinExistingTeam: "Join a team that already exists",
-  yourName: "Your name",
-  teamName: "Team name",
-  chooseLook: "Choose how you want to appear",
-  chooseAvatar: "Choose an avatar",
-  takePhoto: "Take a photo",
-  choosePhoto: "Take or choose a photo",
-  removePhoto: "Remove photo",
-  skip: "Skip",
-  photoPrivate: "The photo is only shown to you and the trail host.",
-  start: "Let's go!",
-  waitingTitle: "The trail starts soon!",
-  waitingForHost: "Waiting for the host to start the trail.",
-  startsIn: "Your trail starts in",
-  pausedTitle: "Paused",
-  paused: "The trail is paused right now. Hang on, it will continue soon.",
-  step: "Step {n} of {total}",
-  clue: "Clue",
-  treasureClue: "Final clue – to the treasure!",
-  scan: "Scan QR code",
-  help: "Ask for help",
-  helpConfirm: "Do you want help? It costs {n} point.",
-  helpYes: "Yes, show help",
-  helpNo: "No, we'll keep looking",
-  helpLabel: "Help",
-  points: "points",
-  score: "Points",
-  time: "Time",
-  found: "Well done! You found the right place.",
-  foundTreasure: "You found the treasure!",
-  questionsTitle: "Answer the questions",
-  questionN: "Question {n} of {total}",
-  correct: "Correct! +{n}",
-  wrong: "Not quite. The right answer was: {answer}",
-  continue: "Continue",
-  missionTitle: "Mission",
-  missionDone: "Done!",
-  missionSkip: "Skip",
-  nextUnlocked: "Nice! The next clue is unlocked.",
-  onTrack: "You're on the right track.",
-  whatNow: "What happens now?",
-  whatNowSeeking: "Read the clue. Go to the place. Scan the QR code.",
-  whatNowQuestions: "Answer the questions. Then you get the next clue.",
-  whatNowMission: "Do the mission together and press Done.",
-  scanTitle: "Scan the QR code",
-  scanHint: "Point the camera at the QR code.",
-  scanCameraError: "The camera could not start. Use your phone's normal camera app to scan the QR code instead.",
-  close: "Close",
-  scan_notStarted: "Your trail has not started yet. Wait until the countdown is done.",
-  scan_paused: "The trail is paused right now.",
-  scan_huntFinished: "The trail has finished.",
-  scan_teamFinished: "You have already found the treasure!",
-  scan_alreadyFound: "You already found this place. Keep following your current clue.",
-  scan_finishStepFirst: "Almost there! Finish the questions and mission here first.",
-  scan_wrongStep: "You found a real clue, but not the one you are looking for right now. Keep following your current clue.",
-  scan_unknown: "This QR code doesn't belong to your trail.",
-  finishedTitle: "You completed the Treasure Trail!",
-  waitingResults: "Waiting for the trail to finish. Then the results are shown.",
-  results: "Results",
-  place: "Place",
-  winner: "Winner",
-  diploma: "Diploma",
-  showDiploma: "Show diploma",
-  print: "Print / save",
-  diplomaText: "You completed the Treasure Trail!",
-  diplomaTextSingle: "You completed the Treasure Trail!",
-  date: "Date",
-  checkpointsFound: "Places found",
-  correctAnswers: "Correct answers",
-  missionsDone: "Missions",
-  hints: "Help",
-  treasure: "Treasure",
-  yes: "Yes",
-  no: "No",
-  team: "Team",
-  members: "More team members can join with the code",
-  notJoined: "You haven't joined this trail yet.",
-  joinFirst: "Join first",
-  scanRegistered: "Scan registered",
-  goToHunt: "Go to the trail",
-  calmBreak: "Take it easy. There is no rush.",
-};
-
-const dict: Record<Language, Record<TextKey, string>> = { sv, en };
-
-export function t(lang: Language, key: TextKey, vars?: Record<string, string | number>): string {
-  let s = dict[lang][key] ?? sv[key];
+export function t(key: TextKey, vars?: Record<string, string | number>): string {
+  let s: string = sv[key];
   if (vars) for (const [k, v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, String(v));
   return s;
 }

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar";
 import { AvatarPicker } from "@/components/AvatarPicker";
+import { BrandSymbol } from "@/components/Brand";
 import { QrScanner } from "@/components/QrScanner";
 import { TopBar } from "@/components/TopBar";
 import type { ScanOutcome, ScanResult } from "@/lib/game";
@@ -14,11 +15,11 @@ import { answerAction, continueAction, helpAction, missionAction, playStateActio
 
 type Feedback = { emoji: string; title: string; text?: string; good: boolean } | null;
 
-export function feedbackFor(lang: PlayState["hunt"]["language"], result: ScanResult): Feedback {
+export function feedbackFor(result: ScanResult): Feedback {
   if (result.outcome === "checkpointFound")
-    return { emoji: "🎉", title: t(lang, "found"), text: `+${result.points} ${t(lang, "points")}`, good: true };
-  if (result.outcome === "treasureFound") return { emoji: "💎", title: t(lang, "foundTreasure"), text: `+${result.points} ${t(lang, "points")}`, good: true };
-  return { emoji: result.outcome === "notStarted" ? "⏳" : "🧭", title: t(lang, `scan_${result.outcome}` as TextKey), good: false };
+    return { emoji: "🎉", title: t("found"), text: `+${result.points} ${t("points")}`, good: true };
+  if (result.outcome === "treasureFound") return { emoji: "💎", title: t("foundTreasure"), text: `+${result.points} ${t("points")}`, good: true };
+  return { emoji: result.outcome === "notStarted" ? "⏳" : "🧭", title: t(`scan_${result.outcome}` as TextKey), good: false };
 }
 
 function useServerClock(serverNow: string | undefined) {
@@ -45,8 +46,7 @@ export function Play({ huntId, initial }: { huntId: string; initial: PlayState }
   const [picked, setPicked] = useState<Record<string, number>>({});
   const [busy, setBusy] = useState(false);
   const now = useServerClock(state.now);
-  const lang = state.hunt.language;
-  const tr = (key: TextKey, vars?: Record<string, string | number>) => t(lang, key, vars);
+  const tr = t;
 
   const refresh = useCallback(async () => {
     const res = await playStateAction(huntId);
@@ -62,10 +62,10 @@ export function Play({ huntId, initial }: { huntId: string; initial: PlayState }
   useEffect(() => {
     const outcome = search.get("r") as ScanOutcome | null;
     if (outcome) {
-      setFeedback(feedbackFor(lang, { outcome, points: Number(search.get("p") ?? 0) }));
+      setFeedback(feedbackFor({ outcome, points: Number(search.get("p") ?? 0) }));
       router.replace(`/play/${huntId}`);
     }
-  }, [search, lang, huntId, router]);
+  }, [search, huntId, router]);
 
   const act = async <T,>(fn: () => Promise<{ ok: true; data: { result: T; state: PlayState } } | { ok: false; error: string }>) => {
     setBusy(true);
@@ -86,10 +86,10 @@ export function Play({ huntId, initial }: { huntId: string; initial: PlayState }
     async (token: string) => {
       setScanning(false);
       const result = await act(() => scanAction(huntId, token));
-      if (result) setFeedback(feedbackFor(lang, result));
+      if (result) setFeedback(feedbackFor(result));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [huntId, lang],
+    [huntId],
   );
 
   const { hunt, team } = state;
@@ -109,7 +109,7 @@ export function Play({ huntId, initial }: { huntId: string; initial: PlayState }
 
   return (
     <>
-      <TopBar brand={hunt.brandName} />
+      <TopBar />
       <main className="page">
         <div className="play-header">
           <Avatar avatarId={team.avatarId} photoUrl={team.photoUrl} size={56} name={team.name} />
@@ -118,7 +118,7 @@ export function Play({ huntId, initial }: { huntId: string; initial: PlayState }
             <div className="muted small">{hunt.name}</div>
           </div>
           <div className="score-pill">
-            ⭐ {team.stats.score}
+            {team.stats.score} {tr("points")}
             {!calm && team.actualStartAt && <span className="small"> · ⏱ {formatDuration(liveElapsed)}</span>}
           </div>
         </div>
@@ -137,7 +137,7 @@ export function Play({ huntId, initial }: { huntId: string; initial: PlayState }
         {/* Före start ------------------------------------------------------ */}
         {team.status === "waiting" && hunt.status !== "finished" && (
           <section className="card center">
-            <div style={{ fontSize: "3rem" }}>⏳</div>
+            <BrandSymbol width={160} className="symbol" />
             <h2>{tr("waitingTitle")}</h2>
             {shouldCountDown && startsIn! > 0 ? (
               <>
@@ -198,13 +198,13 @@ export function Play({ huntId, initial }: { huntId: string; initial: PlayState }
                     >
                       {tr("helpYes")}
                     </button>
-                    <button className="btn" onClick={() => setAskHelp(false)}>
+                    <button className="btn secondary" onClick={() => setAskHelp(false)}>
                       {tr("helpNo")}
                     </button>
                   </div>
                 </div>
               ) : (
-                <button className="btn block" onClick={() => setAskHelp(true)}>
+                <button className="btn secondary block" onClick={() => setAskHelp(true)}>
                   🛟 {tr("help")}
                 </button>
               )}
@@ -253,7 +253,7 @@ export function Play({ huntId, initial }: { huntId: string; initial: PlayState }
                     disabled={picked[q.id] == null || busy}
                     onClick={() => act(() => answerAction(huntId, q.id, picked[q.id]))}
                   >
-                    {lang === "sv" ? "Svara" : "Answer"}
+                    Svara
                   </button>
                 )}
               </section>
@@ -289,7 +289,7 @@ export function Play({ huntId, initial }: { huntId: string; initial: PlayState }
                 ✅ {tr("missionDone")}
               </button>
               <button
-                className="btn block"
+                className="btn secondary block"
                 disabled={busy}
                 onClick={async () => {
                   const r = await act(() => missionAction(huntId, false));
@@ -307,10 +307,10 @@ export function Play({ huntId, initial }: { huntId: string; initial: PlayState }
         {(team.status === "finished" || hunt.status === "finished") && <Finished state={state} />}
       </main>
 
-      {scanning && <QrScanner lang={lang} onResult={onScan} onClose={() => setScanning(false)} />}
+      {scanning && <QrScanner onResult={onScan} onClose={() => setScanning(false)} />}
 
       {feedback && (
-        <div className="overlay" onClick={() => setFeedback(null)} style={{ background: feedback.good ? "rgba(44,140,104,0.95)" : "rgba(35,49,74,0.95)" }}>
+        <div className="overlay" onClick={() => setFeedback(null)} style={{ background: feedback.good ? "rgba(47, 115, 90, 0.97)" : "rgba(29, 78, 95, 0.97)" }}>
           <div className="celebrate">{feedback.emoji}</div>
           <h1 className="center" style={{ maxWidth: 480 }}>
             {feedback.title}
@@ -344,17 +344,15 @@ function WhatNow({ calm, title, text }: { calm: boolean; title: string; text: st
 
 function LookEditor({ state, huntId, onSaved }: { state: PlayState; huntId: string; onSaved: () => void }) {
   const [open, setOpen] = useState(false);
-  const lang = state.hunt.language;
   if (!open)
     return (
       <button className="btn block" onClick={() => setOpen(true)}>
-        🎨 {t(lang, "chooseLook")}
+        🎨 {t("chooseLook")}
       </button>
     );
   return (
     <section className="card">
       <AvatarPicker
-        lang={lang}
         kind={state.hunt.playMode === "team" ? "team" : "person"}
         avatarId={state.team.avatarId}
         photoUrl={state.team.photoUrl}
@@ -372,59 +370,58 @@ function LookEditor({ state, huntId, onSaved }: { state: PlayState; huntId: stri
 }
 
 function Finished({ state }: { state: PlayState }) {
-  const lang = state.hunt.language;
   const { team, hunt } = state;
   const s = team.stats;
   return (
     <>
       <section className="card gold center">
-        <div style={{ fontSize: "3.5rem" }}>{s.treasureFound ? "💎" : "🏁"}</div>
-        <h1>{s.treasureFound ? t(lang, "finishedTitle") : t(lang, "scan_huntFinished")}</h1>
+        {s.treasureFound ? <BrandSymbol width={180} className="symbol" /> : <div style={{ fontSize: "3.5rem" }}>🏁</div>}
+        <h1>{s.treasureFound ? t("finishedTitle") : t("scan_huntFinished")}</h1>
         <div className="row" style={{ justifyContent: "center", gap: 24 }}>
           <div>
-            <div className="muted small">{t(lang, "score")}</div>
+            <div className="muted small">{t("score")}</div>
             <strong style={{ fontSize: "1.8rem" }}>{s.score}</strong>
           </div>
           {!hunt.calm && (
             <div>
-              <div className="muted small">{t(lang, "time")}</div>
+              <div className="muted small">{t("time")}</div>
               <strong style={{ fontSize: "1.8rem" }}>{formatDuration(team.elapsedSeconds)}</strong>
             </div>
           )}
         </div>
         <p className="small" style={{ marginTop: 12 }}>
-          {t(lang, "checkpointsFound")}: {s.checkpointsFound} · {t(lang, "correctAnswers")}: {s.correctAnswers} · {t(lang, "missionsDone")}: {s.missionsCompleted} ·{" "}
-          {t(lang, "hints")}: {s.hints}
+          {t("checkpointsFound")}: {s.checkpointsFound} · {t("correctAnswers")}: {s.correctAnswers} · {t("missionsDone")}: {s.missionsCompleted} ·{" "}
+          {t("hints")}: {s.hints}
         </p>
         {hunt.diploma && (
-          <Link href={`/diploma/${hunt.id}/${team.id}`} className="btn primary">
-            📜 {t(lang, "showDiploma")}
+          <Link href={`/diploma/${hunt.id}/${team.id}`} className="btn gold">
+            📜 {t("showDiploma")}
           </Link>
         )}
       </section>
 
       {state.ranking ? (
         <section className="card">
-          <h2>🏆 {t(lang, "results")}</h2>
+          <h2>🏆 {t("results")}</h2>
           {state.ranking.map((r) => (
             <div key={r.teamId} className="cp-item" style={{ marginBottom: 8, cursor: "default", borderColor: r.isMe ? "var(--accent)" : undefined }}>
               <strong style={{ width: 30, fontSize: "1.2rem" }}>{r.place === 1 ? "🥇" : r.place === 2 ? "🥈" : r.place === 3 ? "🥉" : r.place}</strong>
               <Avatar avatarId={r.avatarId} photoUrl={r.photoUrl} size={40} />
               <span style={{ flex: 1 }}>
                 <strong>{r.name}</strong>
-                {r.place === 1 && <span className="badge gold" style={{ marginLeft: 6 }}>{t(lang, "winner")}</span>}
+                {r.place === 1 && <span className="badge gold" style={{ marginLeft: 6 }}>{t("winner")}</span>}
                 <br />
                 <span className="muted small">
                   {r.stats.treasureFound ? "💎 " : ""}
                   {formatDuration(r.elapsedSeconds)}
                 </span>
               </span>
-              <strong>⭐ {r.stats.score}</strong>
+              <strong>{r.stats.score} p</strong>
             </div>
           ))}
         </section>
       ) : (
-        <p className="muted center">{t(lang, "waitingResults")}</p>
+        <p className="muted center">{t("waitingResults")}</p>
       )}
     </>
   );

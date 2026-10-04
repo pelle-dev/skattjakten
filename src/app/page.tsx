@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TopBar } from "@/components/TopBar";
+import { Logo } from "@/components/Brand";
 import { hostHuntIds, playerHuntIds } from "@/lib/session";
 import { readDb } from "@/lib/store";
 import type { HuntStatus } from "@/lib/types";
@@ -23,20 +23,20 @@ export default async function Home() {
 
   return (
     <>
-      <TopBar />
       <main className="page">
-        <section className="card gold center">
-          <div style={{ fontSize: "3.2rem" }}>🗝️</div>
-          <h1>Skattjakten</h1>
-          <p className="muted">Göm QR-koder, följ ledtrådarna och hitta skatten. Treasure Trail på engelska.</p>
+        <section className="hero center">
+          <h1 className="sr-only">Skattjakten</h1>
+          <Logo width={300} className="hero-logo" />
+          <p className="hero-lead">Skapa en rolig skattjakt på några minuter.</p>
+          <p className="muted">Göm, scanna, lös och hitta skatten.</p>
         </section>
 
         <div className="stack">
           <Link href="/create" className="btn primary huge">
-            ✨ Skapa ny skattjakt
+            Skapa ny skattjakt
           </Link>
-          <Link href="/join" className="btn gold huge">
-            🧭 Gå med i skattjakt
+          <Link href="/join" className="btn secondary huge">
+            Gå med i en skattjakt
           </Link>
         </div>
 
@@ -52,7 +52,7 @@ export default async function Home() {
         )}
 
         <section className="card" style={{ marginTop: 20 }}>
-          <h2>Tidigare skattjakter</h2>
+          <h2>Dina skattjakter</h2>
           {hosted.length === 0 ? (
             <p className="muted">Här visas skattjakter som du skapar på den här enheten.</p>
           ) : (

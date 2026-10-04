@@ -110,14 +110,13 @@ export default function TeamsPage() {
                 <input value={name} onChange={(e) => setName(e.target.value)} placeholder={isTeam ? "T.ex. Rävarna" : "T.ex. Alva"} required />
               </label>
               <AvatarPicker
-                lang={h.language}
                 kind={isTeam ? "team" : "person"}
                 avatarId={look.avatarId}
                 photoUrl={look.photoUrl}
                 allowPhoto={h.allowPhotos && bundle.limits.photos}
                 onChange={(v) => {
                   setLook(v);
-                  const label = TEAM_AVATARS.find((a) => a.id === v.avatarId)?.label[h.language];
+                  const label = TEAM_AVATARS.find((a) => a.id === v.avatarId)?.label;
                   if (isTeam && !name && label) setName(label);
                 }}
               />

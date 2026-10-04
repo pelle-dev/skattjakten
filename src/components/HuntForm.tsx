@@ -7,7 +7,6 @@ import type { Plan } from "@/lib/types";
 
 export const DEFAULT_HUNT_INPUT: HuntInput = {
   name: "",
-  language: "sv",
   description: "",
   template: "none",
   gameMode: "classic",
@@ -90,7 +89,7 @@ export function HuntForm({
       themes: tpl.themes,
       ageGroup: tpl.ageGroup,
       difficulty: tpl.difficulty,
-      name: prev.name || (id === "none" ? "" : tpl.label[prev.language]),
+      name: prev.name || (id === "none" ? "" : tpl.label),
       description: prev.description || (id === "none" ? "" : tpl.description),
     }));
   };
@@ -126,7 +125,7 @@ export function HuntForm({
           <Choice
             value={v.template}
             disabled={locked}
-            options={TEMPLATES.map((tpl) => ({ id: tpl.id, label: tpl.label.sv + (tpl.id !== "none" ? paidOnly : ""), disabled: tpl.id !== "none" && !limits.templates }))}
+            options={TEMPLATES.map((tpl) => ({ id: tpl.id, label: tpl.label + (tpl.id !== "none" ? paidOnly : ""), disabled: tpl.id !== "none" && !limits.templates }))}
             onChange={setTemplate}
           />
           <small>{templateById(v.template).description}</small>
@@ -139,18 +138,6 @@ export function HuntForm({
           <span>Beskrivning</span>
           <textarea value={v.description} onChange={(e) => set("description", e.target.value)} placeholder="Valfritt" maxLength={500} />
         </label>
-        <div className="field">
-          <span>Språk</span>
-          <Choice
-            value={v.language}
-            disabled={locked}
-            options={[
-              { id: "sv", label: "🇸🇪 Svenska (Skattjakten)" },
-              { id: "en", label: "🇬🇧 English (Treasure Trail)" },
-            ]}
-            onChange={(x) => set("language", x)}
-          />
-        </div>
       </section>
 
       <section className="card">
@@ -162,7 +149,7 @@ export function HuntForm({
             disabled={locked}
             options={GAME_MODES.map((g) => ({
               id: g.id,
-              label: g.label.sv + (g.available ? (limits.gameModes.includes(g.id) ? "" : paidOnly) : " (snart)"),
+              label: g.label + (g.available ? (limits.gameModes.includes(g.id) ? "" : paidOnly) : " (snart)"),
               disabled: !g.available || !limits.gameModes.includes(g.id),
             }))}
             onChange={(x) => set("gameMode", x)}
@@ -183,7 +170,7 @@ export function HuntForm({
         </div>
         <div className="field">
           <span>Vinstläge</span>
-          <Choice value={v.winMode} disabled={locked} options={WIN_MODES.map((w) => ({ id: w.id, label: w.label.sv }))} onChange={(x) => set("winMode", x)} />
+          <Choice value={v.winMode} disabled={locked} options={WIN_MODES.map((w) => ({ id: w.id, label: w.label }))} onChange={(x) => set("winMode", x)} />
           <small>{WIN_MODES.find((w) => w.id === v.winMode)?.description}</small>
         </div>
         {mode === "create" && (
@@ -208,11 +195,11 @@ export function HuntForm({
         <h2>Deltagarna</h2>
         <div className="field">
           <span>Åldersgrupp</span>
-          <Choice value={v.ageGroup} disabled={locked} options={AGE_GROUPS.map((a) => ({ id: a.id, label: a.label.sv }))} onChange={(x) => set("ageGroup", x)} />
+          <Choice value={v.ageGroup} disabled={locked} options={AGE_GROUPS.map((a) => ({ id: a.id, label: a.label }))} onChange={(x) => set("ageGroup", x)} />
         </div>
         <div className="field">
           <span>Svårighetsgrad</span>
-          <Choice value={v.difficulty} disabled={locked} options={DIFFICULTIES.map((d) => ({ id: d.id, label: d.label.sv }))} onChange={(x) => set("difficulty", x)} />
+          <Choice value={v.difficulty} disabled={locked} options={DIFFICULTIES.map((d) => ({ id: d.id, label: d.label }))} onChange={(x) => set("difficulty", x)} />
         </div>
         <div className="field">
           <span>Tema (välj ett eller flera)</span>
@@ -227,7 +214,7 @@ export function HuntForm({
                   className={`chip ${on ? "on" : ""}`}
                   onClick={() => set("themes", on ? v.themes.filter((x) => x !== th.id) : [...v.themes, th.id].slice(-5))}
                 >
-                  {th.label.sv}
+                  {th.label}
                 </button>
               );
             })}

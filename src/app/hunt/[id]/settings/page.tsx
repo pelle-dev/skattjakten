@@ -26,7 +26,6 @@ export default function SettingsPage() {
         busy={busy}
         initial={{
           name: h.name,
-          language: h.language,
           description: h.description,
           template: h.template,
           gameMode: h.gameMode,

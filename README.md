@@ -1,4 +1,4 @@
-# Skattjakten / Treasure Trail
+# Skattjakten
 
 En mobilanpassad webbapp för fysiska skattjakter med QR-koder. En skattgömmare skapar en kedja av ledtrådar, skriver ut QR-koder och gömmer dem. Deltagarna följer ledtrådarna, scannar QR-koderna, svarar på frågor, gör uppdrag och hittar till slut skatten.
 
@@ -24,7 +24,7 @@ Vill du ändra i koden och se ändringarna direkt kan du köra `npm run dev` i s
 
 På startsidan finns knappen **Skapa Testjakten**. Den skapar en färdig jakt enligt testscenariot:
 
-- namn ”Testjakten”, svenska, mallen Barnkalas, Klassisk skattjakt, lagspel
+- namn ”Testjakten”, mallen Barnkalas, Klassisk skattjakt, lagspel
 - 3 ledtrådar med placering, ledtråd, hjälptext, tre frågor och ett uppdrag var
 - en skatt med egen QR-kod
 - 2 lag (Rävarna och Ugglorna) med avatarer och 2 minuters startintervall
@@ -99,6 +99,15 @@ npm run typecheck # TypeScript
 Testerna i `tests/testjakten.test.ts` går igenom alla 15 punkter i testflödet: jakten skapas, QR-koder finns, lag går med, lagen startar med 2 minuters mellanrum, rätt QR låser upp frågor, rätt svar ger poäng, uppdrag ger poäng, fel QR ger inga poäng, hjälp drar av poäng, paus räknas bort från tiden, skatten hittas och vinnaren utses (både Flest poäng och Snabbast vinner, räknat från lagets egen starttid).
 
 ---
+
+## Grafisk profil
+
+Appen följer Skattjaktens grafiska profil, som finns i `docs/brand.md`. Appen är bara på svenska.
+
+- Färger, hörnradier och typsnitt ligger som variabler överst i `src/app/globals.css`.
+- Typsnitten (Nunito Sans för rubriker, Atkinson Hyperlegible för text) laddas i `src/app/layout.tsx`.
+- Logotyperna ligger i `public/brand/` (primary, monochrome och white för logo, wordmark och symbol, plus appikonen). `src/components/Brand.tsx` har komponenterna `Logo`, `Wordmark` och `BrandSymbol`.
+- Favicon och hemskärmsikon är `src/app/icon.png` och `src/app/apple-icon.png`, gjorda från appikonen.
 
 ## Teknik och arkitektur
 

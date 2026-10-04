@@ -13,7 +13,7 @@ export default function CreatePage() {
   return (
     <main className="page">
       <p>
-        <a href="/">← Start</a>
+        <a href="/">← Till startsidan</a>
       </p>
       <h1>Skapa ny skattjakt</h1>
       <p className="muted">Välj grunderna. Sedan bygger du ledtrådarna en i taget med Ledtrådshjälparen.</p>

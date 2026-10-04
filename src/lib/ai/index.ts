@@ -6,7 +6,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { AGE_GROUPS, DIFFICULTIES, GAME_MODES, themeLabel } from "../catalog";
-import type { AgeGroup, Difficulty, GameMode, Language } from "../types";
+import type { AgeGroup, Difficulty, GameMode } from "../types";
 import { mockClue, mockHelp, mockQuestions } from "./mock";
 import type { GeneratedQuestion } from "./types";
 
@@ -29,20 +29,18 @@ async function ask<T>(prompt: string, schema: z.ZodType<T>, maxTokens = 2000): P
     system:
       "Du hjälper en skattgömmare att skapa en fysisk skattjakt med QR-koder för barn, familjer eller vuxna. " +
       SAFETY_SV +
-      " Svara på det språk som efterfrågas.",
+      " Svara alltid på svenska.",
     messages: [{ role: "user", content: prompt }],
   });
   if (response.stop_reason === "refusal" || !response.parsed_output) throw new Error("AI:n kunde inte skapa något förslag.");
   return response.parsed_output as T;
 }
 
-const langName = (lang: Language) => (lang === "sv" ? "svenska" : "engelska");
-const label = <T extends string>(list: { id: T; label: { sv: string } }[], id: T) => list.find((x) => x.id === id)?.label.sv ?? id;
+const label = <T extends string>(list: { id: T; label: string }[], id: T) => list.find((x) => x.id === id)?.label ?? id;
 
 export interface ClueRequest {
   placementNote: string;
   difficulty: Difficulty;
-  language: Language;
   ageGroup: AgeGroup;
   themes: string[];
   previous?: string;
@@ -50,13 +48,13 @@ export interface ClueRequest {
 }
 
 export async function suggestClue(req: ClueRequest): Promise<string> {
-  if (aiMode() === "mock") return mockClue(req.placementNote, req.difficulty, req.language, req.variant ?? 0);
+  if (aiMode() === "mock") return mockClue(req.placementNote, req.difficulty, req.variant ?? 0);
   const out = await ask(
     [
-      `Skriv EN ledtråd på ${langName(req.language)} som leder deltagarna till platsen där QR-koden är gömd.`,
+      `Skriv EN ledtråd på svenska som leder deltagarna till platsen där QR-koden är gömd.`,
       `Privat placering (får inte avslöjas ordagrant om svårighetsgraden inte är enkel): "${req.placementNote}"`,
       `Svårighetsgrad: ${label(DIFFICULTIES, req.difficulty)}. Enkel = rak instruktion. Medel = lätt omskrivning. Klurig = gåta.`,
-      `Åldersgrupp: ${label(AGE_GROUPS, req.ageGroup)}. Tema: ${req.themes.map((t) => themeLabel(t, "sv")).join(", ")}.`,
+      `Åldersgrupp: ${label(AGE_GROUPS, req.ageGroup)}. Tema: ${req.themes.map((t) => themeLabel(t)).join(", ")}.`,
       "Max två korta meningar.",
       req.previous ? `Skriv något annat än detta tidigare förslag: "${req.previous}"` : "",
     ].join("\n"),
@@ -65,11 +63,11 @@ export async function suggestClue(req: ClueRequest): Promise<string> {
   return out.clue.trim();
 }
 
-export async function suggestHelp(req: { placementNote: string; clue: string; language: Language }): Promise<string> {
-  if (aiMode() === "mock") return mockHelp(req.placementNote, req.language);
+export async function suggestHelp(req: { placementNote: string; clue: string }): Promise<string> {
+  if (aiMode() === "mock") return mockHelp(req.placementNote);
   const out = await ask(
     [
-      `Skriv en kort hjälptext på ${langName(req.language)} som visas om deltagarna fastnar.`,
+      `Skriv en kort hjälptext på svenska som visas om deltagarna fastnar.`,
       `Den ska vara tydligare än ledtråden men gärna inte avslöja exakt allt.`,
       `Ledtråd: "${req.clue}"`,
       `Privat placering: "${req.placementNote}"`,
@@ -82,7 +80,6 @@ export async function suggestHelp(req: { placementNote: string; clue: string; la
 
 export interface QuestionRequest {
   count: number;
-  language: Language;
   ageGroup: AgeGroup;
   themes: string[];
   focus: string[];
@@ -124,14 +121,14 @@ function cleanQuestions(raw: z.infer<typeof QuestionSchema>["questions"], count:
 
 export async function generateQuestions(req: QuestionRequest): Promise<GeneratedQuestion[]> {
   if (aiMode() === "mock") {
-    return mockQuestions({ count: req.count, ageGroup: req.ageGroup, themes: req.themes, focus: req.focus, lang: req.language, avoid: req.avoid });
+    return mockQuestions({ count: req.count, ageGroup: req.ageGroup, themes: req.themes, focus: req.focus, avoid: req.avoid });
   }
   const out = await ask(
     [
-      `Skapa ${req.count} flervalsfrågor på ${langName(req.language)} till en kontrollpunkt i en skattjakt.`,
+      `Skapa ${req.count} flervalsfrågor på svenska till en kontrollpunkt i en skattjakt.`,
       `Åldersgrupp: ${label(AGE_GROUPS, req.ageGroup)}. Svårighetsgrad: ${label(DIFFICULTIES, req.difficulty)}.`,
-      `Tema: ${req.themes.map((t) => themeLabel(t, "sv")).join(", ")}${req.focus.length ? ` (gärna med inslag av: ${req.focus.join(", ")})` : ""}.`,
-      `Spelläge: ${GAME_MODES.find((g) => g.id === req.gameMode)?.label.sv ?? req.gameMode}.`,
+      `Tema: ${req.themes.map((t) => themeLabel(t)).join(", ")}${req.focus.length ? ` (gärna med inslag av: ${req.focus.join(", ")})` : ""}.`,
+      `Spelläge: ${GAME_MODES.find((g) => g.id === req.gameMode)?.label ?? req.gameMode}.`,
       req.clue ? `Ledtråden till platsen är: "${req.clue}". Frågorna får gärna knyta an till den, men måste inte.` : "",
       "Varje fråga: 3 eller 4 korta svarsalternativ, exakt ett rätt svar (correctIndex börjar på 0), och en kort förklaring som bara skattgömmaren ser.",
       "Frågorna ska gå att svara på utan att googla och vara roliga och tydliga för målgruppen.",

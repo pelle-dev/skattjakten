@@ -10,7 +10,6 @@ import type {
   Difficulty,
   GameMode,
   Hunt,
-  Language,
   Mission,
   Participant,
   Plan,
@@ -28,7 +27,6 @@ export class UserError extends Error {}
 
 export interface HuntInput {
   name: string;
-  language: Language;
   description: string;
   template: TemplateId;
   gameMode: GameMode;
@@ -127,8 +125,6 @@ export function createHunt(db: Db, rawInput: HuntInput, now = new Date()): Hunt 
   const hunt: Hunt = {
     id: newId(),
     name: input.name,
-    language: input.language,
-    brandName: input.language === "en" ? "Treasure Trail" : "Skattjakten",
     description: input.description,
     template: input.template,
     gameMode: input.gameMode,
@@ -165,14 +161,14 @@ export function createHunt(db: Db, rawInput: HuntInput, now = new Date()): Hunt 
     db.checkpoints.push(cp);
     if (limits.missions) {
       const example = template.missions[i % template.missions.length];
-      db.missions.push(newMission(hunt, cp.id, example[hunt.language], now));
+      db.missions.push(newMission(hunt, cp.id, example, now));
     }
   }
   const treasure: Treasure = {
     id: newId(),
     huntId: hunt.id,
     hostPlacementNote: "",
-    publicClueText: template.id === "none" ? "" : template.treasureClue[hunt.language],
+    publicClueText: template.id === "none" ? "" : template.treasureClue,
     helpText: "",
     qrToken: newQrToken(),
     createdAt: iso(now),
@@ -199,7 +195,6 @@ export function updateHuntSettings(db: Db, huntId: string, patch: HuntSettingsPa
   }
   const merged = sanitizeInput({
     name: patch.name ?? hunt.name,
-    language: patch.language ?? hunt.language,
     description: patch.description ?? hunt.description,
     template: patch.template ?? hunt.template,
     gameMode: patch.gameMode ?? hunt.gameMode,
@@ -217,8 +212,6 @@ export function updateHuntSettings(db: Db, huntId: string, patch: HuntSettingsPa
   const limits = PLAN_LIMITS[plan];
   Object.assign(hunt, {
     name: merged.name,
-    language: merged.language,
-    brandName: merged.language === "en" ? "Treasure Trail" : "Skattjakten",
     description: merged.description,
     template: merged.template,
     gameMode: merged.gameMode,
@@ -266,14 +259,14 @@ export function addCheckpoint(db: Db, huntId: string, now = new Date()): Checkpo
   db.checkpoints.push(cp);
   if (limits.missions) {
     const template = templateById(hunt.template);
-    db.missions.push(newMission(hunt, cp.id, template.missions[cp.order % template.missions.length][hunt.language], now));
+    db.missions.push(newMission(hunt, cp.id, template.missions[cp.order % template.missions.length], now));
   }
   return cp;
 }
 
 function renumber(db: Db, huntId: string) {
   checkpointsOf(db, huntId).forEach((c, i) => {
-    if (/^(Kontrollpunkt|Checkpoint) \d+$/.test(c.title)) c.title = `Kontrollpunkt ${i + 1}`;
+    if (/^Kontrollpunkt \d+$/.test(c.title)) c.title = `Kontrollpunkt ${i + 1}`;
     c.order = i;
   });
 }

@@ -1,6 +1,6 @@
 import QRCode from "qrcode";
 import { checkpointsOf, treasureOf } from "@/lib/hunts";
-import { t } from "@/lib/i18n";
+import { Logo } from "@/components/Brand";
 import { baseUrl } from "@/lib/session";
 import { readDb } from "@/lib/store";
 import { PrintButton } from "./PrintButton";
@@ -17,10 +17,9 @@ export default async function PrintPage({ params, searchParams }: { params: Prom
   const base = await baseUrl();
   const items = [
     ...cps.map((c) => ({ key: c.id, title: c.title, number: String(c.order + 1), note: c.hostPlacementNote, clue: c.publicClueText, token: c.qrToken })),
-    { key: "treasure", title: hunt.language === "sv" ? "Skatten" : "The treasure", number: "💎", note: treasure.hostPlacementNote, clue: treasure.publicClueText, token: treasure.qrToken },
+    { key: "treasure", title: "Skatten", number: "💎", note: treasure.hostPlacementNote, clue: treasure.publicClueText, token: treasure.qrToken },
   ];
   const qrs = await Promise.all(items.map((i) => QRCode.toDataURL(`${base}/s/${i.token}`, { margin: 2, width: 600, errorCorrectionLevel: "M" })));
-  const scanText = hunt.language === "sv" ? "Scanna när ni har hittat denna punkt" : "Scan when you have found this point";
   const isLocal = /localhost|127\.0\.0\.1/.test(base);
 
   return (
@@ -51,12 +50,14 @@ export default async function PrintPage({ params, searchParams }: { params: Prom
       {view === "qr" &&
         items.map((item, i) => (
           <section className="qr-page" key={item.key}>
-            <div className="qr-brand">🗺️ {hunt.brandName}</div>
+            <div className="qr-brand">
+              <Logo width={260} />
+            </div>
             <div className="muted">{hunt.name}</div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qrs[i]} alt={`QR-kod ${item.title}`} />
-            <div className="qr-title">{item.key === "treasure" ? `💎 ${item.title}` : `${hunt.language === "sv" ? "Kontrollpunkt" : "Checkpoint"} ${item.number}`}</div>
-            <p className="big">{scanText}</p>
+            <div className="qr-title">{item.key === "treasure" ? `💎 ${item.title}` : `Kontrollpunkt ${item.number}`}</div>
+            <p className="big">Scanna när ni har hittat den här platsen</p>
             <p className="no-print small">
               <a href={`/s/${item.token}`} target="_blank">
                 Testlänk (öppnar samma sak som en scanning)
@@ -81,7 +82,7 @@ export default async function PrintPage({ params, searchParams }: { params: Prom
             </div>
           ))}
           <p className="muted small" style={{ marginTop: 12 }}>
-            Tips: {t(hunt.language, "appName")} visar alltid bara en ledtråd i taget. Ledtråd 1 visas när laget startar.
+            Tips: Skattjakten visar alltid bara en ledtråd i taget. Ledtråd 1 visas när laget startar.
           </p>
         </section>
       )}

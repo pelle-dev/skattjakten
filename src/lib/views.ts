@@ -21,8 +21,6 @@ export interface PlayState {
   hunt: {
     id: string;
     name: string;
-    brandName: string;
-    language: Hunt["language"];
     status: Hunt["status"];
     gameMode: Hunt["gameMode"];
     winMode: Hunt["winMode"];
@@ -63,7 +61,7 @@ export function buildPlayState(db: Db, ctx: PlayContext, now: Date): PlayState {
     clue = { stepNumber: team.currentStep + 1, isTreasure, text: target.publicClueText };
     const targetCpId = isTreasure ? null : (target as Checkpoint).id;
     const hints = db.hintRequests.filter((h) => h.teamId === team.id && h.checkpointId === targetCpId);
-    const fallback = hunt.language === "sv" ? "Läs ledtråden en gång till och titta runt omkring er." : "Read the clue again and look around you.";
+    const fallback = "Läs ledtråden en gång till och titta runt omkring er.";
     help = hints.map(() => target.helpText || fallback);
   }
 
@@ -97,8 +95,6 @@ export function buildPlayState(db: Db, ctx: PlayContext, now: Date): PlayState {
     hunt: {
       id: hunt.id,
       name: hunt.name,
-      brandName: hunt.brandName,
-      language: hunt.language,
       status: hunt.status,
       gameMode: hunt.gameMode,
       winMode: hunt.winMode,

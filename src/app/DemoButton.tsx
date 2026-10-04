@@ -9,7 +9,7 @@ export function DemoButton() {
   const [busy, setBusy] = useState(false);
   return (
     <button
-      className="btn primary"
+      className="btn"
       disabled={busy}
       onClick={async () => {
         setBusy(true);

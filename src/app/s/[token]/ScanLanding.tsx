@@ -3,10 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { TopBar } from "@/components/TopBar";
-import type { Language } from "@/lib/types";
 import { scanAction } from "../../actions/play";
 
-export function ScanLanding({ huntId, token, lang, brand }: { huntId: string; token: string; lang: Language; brand: string }) {
+export function ScanLanding({ huntId, token }: { huntId: string; token: string }) {
   const router = useRouter();
   const sent = useRef(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,11 +19,11 @@ export function ScanLanding({ huntId, token, lang, brand }: { huntId: string; to
   }, [huntId, token, router]);
   return (
     <>
-      <TopBar brand={brand} />
+      <TopBar />
       <main className="page center">
         <div className="card">
           <div style={{ fontSize: "3rem" }}>🔍</div>
-          <p className="big">{error ?? (lang === "sv" ? "Kollar QR-koden…" : "Checking the QR code…")}</p>
+          <p className="big">{error ?? "Kollar QR-koden…"}</p>
         </div>
       </main>
     </>

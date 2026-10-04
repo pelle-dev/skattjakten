@@ -23,7 +23,7 @@ async function asPlayer<T>(huntId: string, fn: (db: Db, ctx: ReturnType<typeof p
   });
 }
 
-/** Information inför att gå med (namn, språk, lag- eller individuellt spel). */
+/** Information inför att gå med (namn, lag- eller individuellt spel). */
 export async function joinInfoAction(code: string) {
   return run(async () => {
     const db = await readDb();
@@ -34,8 +34,6 @@ export async function joinInfoAction(code: string) {
     return {
       huntId: hunt.id,
       name: hunt.name,
-      brandName: hunt.brandName,
-      language: hunt.language,
       playMode: hunt.playMode,
       allowPhotos: hunt.allowPhotos && hunt.plan === "paid",
       team: team ? { name: team.name, avatarId: team.avatarId } : null,

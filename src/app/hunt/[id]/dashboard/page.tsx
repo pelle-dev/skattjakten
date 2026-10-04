@@ -20,7 +20,7 @@ const SCAN_TEXT: Record<string, string> = {
   teamFinished: "Laget är redan klart",
   alreadyFound: "Redan hittad",
   finishStepFirst: "Laget har frågor/uppdrag kvar",
-  wrongStep: "Fel ordning – inga poäng",
+  wrongStep: "Annan ledtråd än den de letade efter – inga poäng",
   unknown: "Okänd kod",
 };
 
@@ -199,7 +199,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="card" style={{ background: "#f6f7fb" }}>
+        <section className="card" style={{ background: "var(--lugn-himmel)", borderColor: "transparent", boxShadow: "none" }}>
           <h2>🧪 Testläge</h2>
           <p className="muted small">Låtsas att ett lag scannar en QR-kod, utan att gå runt. Bra när du vill prova flödet hemma.</p>
           <label className="field">

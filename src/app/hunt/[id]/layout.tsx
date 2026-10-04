@@ -30,7 +30,7 @@ export default async function HostLayout({ children, params }: { children: React
   }
   return (
     <>
-      <TopBar brand={hunt.brandName} right={<span className="badge grey">Skattgömmare</span>} />
+      <TopBar right={<span className="badge grey">Skattgömmare</span>} />
       <main className="page wide">
         <div className="no-print">
           <h1 style={{ marginBottom: 4 }}>{hunt.name}</h1>
