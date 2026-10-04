@@ -157,6 +157,71 @@ p {
   margin-bottom: 6px;
 }
 
+/* Bildspelet "Så går det till" på startsidan */
+.slideshow {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.slide-phone {
+  width: min(240px, 70%);
+  margin: 0 auto 12px;
+  border: 6px solid var(--skogsstig);
+  border-radius: 28px;
+  overflow: hidden;
+  background: var(--kartpapper);
+  box-shadow: var(--shadow);
+}
+
+.slide-phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.slide-caption {
+  min-height: 96px;
+}
+
+.slide-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.slide-controls .btn {
+  min-width: 56px;
+}
+
+.slide-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.slide-dots button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+}
+
+.slide-dots button::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.slide-dots button.on::after {
+  background: var(--skattguld);
+}
+
 /* Symbolen (stig och kista) i tomma lägen, laddning och vid skatten */
 .symbol {
   display: block;
