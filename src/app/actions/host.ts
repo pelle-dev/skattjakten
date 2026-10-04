@@ -32,6 +32,7 @@ import {
   type TeamInput,
   type TreasurePatch,
 } from "@/lib/hunts";
+import { purgeOldHunts } from "@/lib/cleanup";
 import { aiDailyCap, checkLook, limitSize, rateLimit, requireStrings } from "@/lib/guard";
 import { run } from "@/lib/result";
 import { isHost, otherActiveHunts, setHostCookie } from "@/lib/session";
@@ -71,7 +72,10 @@ export async function createHuntAction(input: HuntInput) {
   return run(async () => {
     limitSize(input, 4000);
     await rateLimit("createHunt");
-    const hunt = await mutate((db) => createHunt(db, input));
+    const hunt = await mutate((db) => {
+      purgeOldHunts(db);
+      return createHunt(db, input);
+    });
     await setHostCookie(hunt);
     return { id: hunt.id };
   });
@@ -80,7 +84,10 @@ export async function createHuntAction(input: HuntInput) {
 export async function createDemoAction() {
   return run(async () => {
     await rateLimit("createHunt");
-    const hunt = await mutate((db) => createTestjakten(db));
+    const hunt = await mutate((db) => {
+      purgeOldHunts(db);
+      return createTestjakten(db);
+    });
     await setHostCookie(hunt);
     return { id: hunt.id };
   });

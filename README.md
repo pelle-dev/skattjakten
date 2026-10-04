@@ -187,3 +187,9 @@ Gränserna finns på ett ställe: `LIMITS` i `src/lib/catalog.ts`. Äldre jakter
 ## Inte byggt i MVP (men förberett)
 
 Native-app, betalning, GPS/kartor, pushnotiser, publika eller kommersiella jakter, sponsorer, leadformulär, premiumteman, användarkonton, fotobevis för uppdrag, Poängjakt (valfri ordning) och PDF-diplom. Datamodellen har fält för kommersiell användning (`ownerType`, `visibility`, `commercial`, `CommercialSettings`) och uppdrag har `missionType` för framtida foto/godkännande.
+
+## Integritet och säkerhet
+
+- En skattjakt raderas automatiskt, med alla lag, namn, bilder och svar, 90 dagar efter senaste aktivitet (för en avslutad jakt: 90 dagar efter avslut). Rensningen körs varje natt (`vercel.json`, `/api/cleanup`) och när en ny jakt skapas.
+- Varje värdsida under `/hunt/[id]` måste själv kontrollera värdnyckeln med `hostHunt()`; layouten räcker inte som skydd.
+- Antal nya jakter, anslutningar och AI-förslag begränsas per nätverk. `AI_DAILY_LIMIT` (standard 2000) är taket för AI-förslag per dygn i hela appen.
