@@ -1,6 +1,8 @@
+import { notFound } from "next/navigation";
 import Link from "next/link";
+import { RETENTION_DAYS } from "@/lib/cleanup";
 import { validateHunt, checkpointsOf, teamsOf } from "@/lib/hunts";
-import { baseUrl } from "@/lib/session";
+import { baseUrl, hostHunt } from "@/lib/session";
 import { readDb } from "@/lib/store";
 import { CopyLink } from "./CopyLink";
 
@@ -9,7 +11,8 @@ export const dynamic = "force-dynamic";
 export default async function Overview({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const db = await readDb();
-  const hunt = db.hunts.find((h) => h.id === id)!;
+  const hunt = await hostHunt(db, id);
+  if (!hunt) notFound();
   const { errors, warnings } = validateHunt(db, id);
   const cps = checkpointsOf(db, id);
   const teams = teamsOf(db, id);
@@ -70,6 +73,9 @@ export default async function Overview({ params }: { params: Promise<{ id: strin
             Värdlänk: öppna jakten som skattgömmare på en annan enhet. Dela den inte med deltagarna.
           </p>
           <CopyLink label="Värdlänk" url={`${base}/hunt/${id}/claim?key=${hunt.hostKey}`} />
+          <p className="small muted" style={{ marginTop: 16 }}>
+            Skattjakten raderas automatiskt, med alla namn, bilder och svar, {RETENTION_DAYS} dagar efter att den avslutats.
+          </p>
         </section>
       </div>
     </div>

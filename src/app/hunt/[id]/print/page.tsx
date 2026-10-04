@@ -1,7 +1,8 @@
+import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import { checkpointsOf, treasureOf } from "@/lib/hunts";
 import { Logo } from "@/components/Brand";
-import { baseUrl } from "@/lib/session";
+import { baseUrl, hostHunt } from "@/lib/session";
 import { readDb } from "@/lib/store";
 import { PrintButton } from "./PrintButton";
 
@@ -11,7 +12,8 @@ export default async function PrintPage({ params, searchParams }: { params: Prom
   const { id } = await params;
   const view = (await searchParams).view === "list" ? "list" : "qr";
   const db = await readDb();
-  const hunt = db.hunts.find((h) => h.id === id)!;
+  const hunt = await hostHunt(db, id);
+  if (!hunt) notFound();
   const cps = checkpointsOf(db, id);
   const treasure = treasureOf(db, id)!;
   const base = await baseUrl();

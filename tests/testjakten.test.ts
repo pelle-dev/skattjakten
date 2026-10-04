@@ -260,3 +260,30 @@ describe("Testjakten", () => {
     expect(hunt.allowPhotos).toBe(true);
   });
 });
+
+describe("automatisk radering", () => {
+  it("raderar en avslutad jakt med allt innehåll 90 dagar efter avslut, men inte tidigare", async () => {
+    const { purgeOldHunts } = await import("@/lib/cleanup");
+    const { db, hunt } = setup();
+    createTestjakten(db, at(0)); // en till jakt som aldrig startades
+    joinHunt(db, { kind: "new", huntCode: hunt.joinCode, name: "Uglorna" }, at(1));
+    hunt.status = "finished";
+    hunt.finishedAt = at(10).toISOString();
+    const day = 86_400_000;
+    expect(purgeOldHunts(db, new Date(at(10).getTime() + 89 * day))).toBe(0);
+    expect(purgeOldHunts(db, new Date(at(10).getTime() + 91 * day))).toBe(2);
+    expect(db.hunts).toHaveLength(0);
+    expect(db.teams).toHaveLength(0);
+    expect(db.participants).toHaveLength(0);
+    expect(db.checkpoints).toHaveLength(0);
+  });
+
+  it("behåller en jakt som har haft aktivitet nyligen", async () => {
+    const { purgeOldHunts } = await import("@/lib/cleanup");
+    const { db, hunt } = setup();
+    const day = 86_400_000;
+    checkpointsOf(db, hunt.id)[0].updatedAt = new Date(at(0).getTime() + 50 * day).toISOString();
+    expect(purgeOldHunts(db, new Date(at(0).getTime() + 100 * day))).toBe(0);
+    expect(purgeOldHunts(db, new Date(at(0).getTime() + 141 * day))).toBe(1);
+  });
+});

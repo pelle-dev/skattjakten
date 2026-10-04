@@ -32,6 +32,8 @@ import {
   type TeamInput,
   type TreasurePatch,
 } from "@/lib/hunts";
+import { purgeOldHunts } from "@/lib/cleanup";
+import { aiDailyCap, checkLook, limitSize, rateLimit, requireStrings } from "@/lib/guard";
 import { run } from "@/lib/result";
 import { isHost, otherActiveHunts, setHostCookie } from "@/lib/session";
 import { mutate, readDb } from "@/lib/store";
@@ -68,7 +70,12 @@ const hostMutate = async <T,>(kind: Parameters<typeof hostFor>[0], id: string, f
 
 export async function createHuntAction(input: HuntInput) {
   return run(async () => {
-    const hunt = await mutate((db) => createHunt(db, input));
+    limitSize(input, 4000);
+    await rateLimit("createHunt");
+    const hunt = await mutate((db) => {
+      purgeOldHunts(db);
+      return createHunt(db, input);
+    });
     await setHostCookie(hunt);
     return { id: hunt.id };
   });
@@ -76,7 +83,11 @@ export async function createHuntAction(input: HuntInput) {
 
 export async function createDemoAction() {
   return run(async () => {
-    const hunt = await mutate((db) => createTestjakten(db));
+    await rateLimit("createHunt");
+    const hunt = await mutate((db) => {
+      purgeOldHunts(db);
+      return createTestjakten(db);
+    });
     await setHostCookie(hunt);
     return { id: hunt.id };
   });
@@ -91,7 +102,10 @@ export async function hostBundleAction(huntId: string) {
 }
 
 export async function updateSettingsAction(huntId: string, patch: HuntSettingsPatch) {
-  return run(() => hostMutate("hunt", huntId, (db) => void updateHuntSettings(db, huntId, patch)));
+  return run(() => {
+    limitSize(patch, 4000);
+    return hostMutate("hunt", huntId, (db) => void updateHuntSettings(db, huntId, patch));
+  });
 }
 
 // Ledtrådar ------------------------------------------------------------------
@@ -109,17 +123,26 @@ export async function moveCheckpointAction(checkpointId: string, direction: -1 |
 }
 
 export async function updateCheckpointAction(checkpointId: string, patch: CheckpointPatch) {
-  return run(() => hostMutate("checkpoint", checkpointId, (db) => void updateCheckpoint(db, checkpointId, patch)));
+  return run(() => {
+    limitSize(patch, 4000);
+    return hostMutate("checkpoint", checkpointId, (db) => void updateCheckpoint(db, checkpointId, patch));
+  });
 }
 
 export async function updateTreasureAction(huntId: string, patch: TreasurePatch) {
-  return run(() => hostMutate("hunt", huntId, (db) => void updateTreasure(db, huntId, patch)));
+  return run(() => {
+    limitSize(patch, 4000);
+    return hostMutate("hunt", huntId, (db) => void updateTreasure(db, huntId, patch));
+  });
 }
 
 // Frågor och uppdrag -----------------------------------------------------------
 
 export async function saveQuestionAction(checkpointId: string, input: QuestionInput) {
-  return run(() => hostMutate("checkpoint", checkpointId, (db) => saveQuestion(db, checkpointId, input).id));
+  return run(() => {
+    limitSize(input, 3000);
+    return hostMutate("checkpoint", checkpointId, (db) => saveQuestion(db, checkpointId, input).id);
+  });
 }
 
 export async function deleteQuestionAction(questionId: string) {
@@ -131,15 +154,22 @@ export async function approveQuestionAction(questionId: string, approved: boolea
 }
 
 export async function setMissionAction(checkpointId: string, text: string | null) {
-  return run(() => hostMutate("checkpoint", checkpointId, (db) => void setMission(db, checkpointId, text)));
+  return run(() => {
+    limitSize(text, 1000);
+    return hostMutate("checkpoint", checkpointId, (db) => void setMission(db, checkpointId, text));
+  });
 }
 
 // AI ---------------------------------------------------------------------------
 
 export async function aiClueAction(huntId: string, req: { placementNote: string; difficulty: Difficulty; previous?: string; variant?: number }) {
   return run(async () => {
+    limitSize(req, 2000);
+    requireStrings(req.placementNote, req.previous ?? "");
     const hunt = await hostFor("hunt", huntId);
     if (!req.placementNote.trim()) throw new UserError("Skriv först var QR-koden ska placeras.");
+    await rateLimit("ai");
+    await aiDailyCap();
     await mutate((db) => useAiQuota(db, huntId));
     try {
       return await suggestClue({ ...req, ageGroup: hunt.ageGroup, themes: hunt.themes });
@@ -152,7 +182,11 @@ export async function aiClueAction(huntId: string, req: { placementNote: string;
 
 export async function aiHelpAction(huntId: string, req: { placementNote: string; clue: string }) {
   return run(async () => {
-    const hunt = await hostFor("hunt", huntId);
+    limitSize(req, 2000);
+    requireStrings(req.placementNote, req.clue);
+    await hostFor("hunt", huntId);
+    await rateLimit("ai");
+    await aiDailyCap();
     await mutate((db) => useAiQuota(db, huntId));
     try {
       return await suggestHelp(req);
@@ -173,6 +207,8 @@ export async function aiQuestionsAction(checkpointId: string, replaceQuestionId?
     const existing = questionsOf(db, checkpointId);
     const count = replaceQuestionId ? 1 : QUESTIONS_PER_CHECKPOINT - existing.length;
     if (count <= 0) throw new UserError("Ledtråden har redan tre frågor. Ta bort en eller byt ut en fråga.");
+    await rateLimit("ai");
+    await aiDailyCap();
     await mutate((d) => useAiQuota(d, hunt.id));
     const avoid = db.questions.filter((q) => q.huntId === hunt.id).map((q) => q.questionText);
     let generated;
@@ -203,11 +239,19 @@ export async function aiQuestionsAction(checkpointId: string, replaceQuestionId?
 // Lag --------------------------------------------------------------------------
 
 export async function addTeamAction(huntId: string, input: TeamInput) {
-  return run(() => hostMutate("hunt", huntId, (db) => addTeam(db, huntId, input).id));
+  return run(() => {
+    checkLook(input);
+    limitSize({ ...input, photoUrl: null }, 1000);
+    return hostMutate("hunt", huntId, (db) => addTeam(db, huntId, input).id);
+  });
 }
 
 export async function updateTeamAction(teamId: string, input: Partial<TeamInput>) {
-  return run(() => hostMutate("team", teamId, (db) => void updateTeam(db, teamId, input)));
+  return run(() => {
+    checkLook(input);
+    limitSize({ ...input, photoUrl: null }, 1000);
+    return hostMutate("team", teamId, (db) => void updateTeam(db, teamId, input));
+  });
 }
 
 export async function removeTeamAction(teamId: string) {

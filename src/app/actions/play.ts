@@ -4,6 +4,7 @@
 
 import { answerQuestion, completeMission, continueAfterQuestions, playContext, requestHelp, scan, type ScanResult } from "@/lib/game";
 import { findHuntByCode, findTeamByCode, joinHunt, updateTeam, UserError, type JoinInput } from "@/lib/hunts";
+import { checkLook, limitSize, rateLimit, requireStrings } from "@/lib/guard";
 import { run } from "@/lib/result";
 import { playerCredentials, setPlayerCookie } from "@/lib/session";
 import { mutate, readDb } from "@/lib/store";
@@ -26,6 +27,9 @@ async function asPlayer<T>(huntId: string, fn: (db: Db, ctx: ReturnType<typeof p
 /** Information inför att gå med (namn, lag- eller individuellt spel). */
 export async function joinInfoAction(code: string) {
   return run(async () => {
+    requireStrings(code);
+    limitSize(code, 100);
+    await rateLimit("joinInfo");
     const db = await readDb();
     const team = findTeamByCode(db, code);
     const hunt = team ? db.hunts.find((h) => h.id === team.huntId) : findHuntByCode(db, code);
@@ -43,6 +47,9 @@ export async function joinInfoAction(code: string) {
 
 export async function joinAction(input: JoinInput) {
   return run(async () => {
+    if (input.kind === "new") checkLook(input);
+    limitSize({ ...input, photoUrl: null }, 1000);
+    await rateLimit("join");
     const { hunt, participant } = await mutate((db) => joinHunt(db, input));
     await setPlayerCookie(hunt.id, participant.id, participant.token);
     return { huntId: hunt.id };
@@ -56,7 +63,11 @@ export async function playStateAction(huntId: string) {
 export async function scanAction(huntId: string, token: string): Promise<
   { ok: true; data: { result: ScanResult; state: PlayState } } | { ok: false; error: string }
 > {
-  return run(() => asPlayer(huntId, (db, ctx, now) => scan(db, ctx, token.trim(), now)));
+  return run(() => {
+    requireStrings(token);
+    limitSize(token, 200);
+    return asPlayer(huntId, (db, ctx, now) => scan(db, ctx, token.trim(), now));
+  });
 }
 
 export async function answerAction(huntId: string, questionId: string, selected: number) {
@@ -76,5 +87,8 @@ export async function helpAction(huntId: string) {
 }
 
 export async function updateLookAction(huntId: string, look: { avatarId?: string | null; photoUrl?: string | null }) {
-  return run(() => asPlayer(huntId, (db, ctx) => void updateTeam(db, ctx.team.id, look)));
+  return run(() => {
+    checkLook(look);
+    return asPlayer(huntId, (db, ctx) => void updateTeam(db, ctx.team.id, { avatarId: look.avatarId, photoUrl: look.photoUrl }));
+  });
 }

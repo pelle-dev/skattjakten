@@ -147,6 +147,9 @@ export function JoinForm({ code }: { code: string }) {
           <button className="btn primary huge" disabled={busy} style={{ marginTop: 12 }}>
             {t("start")}
           </button>
+          <p className="small muted center" style={{ marginTop: 12 }}>
+            Namn och bilder raderas automatiskt 90 dagar efter att skattjakten avslutats.
+          </p>
         </form>
       </main>
     </>

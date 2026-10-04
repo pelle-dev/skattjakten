@@ -1,6 +1,8 @@
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { checkpointsOf, missionOf, questionsOf, treasureOf, validateHunt } from "@/lib/hunts";
 import { maxScore } from "@/lib/game";
+import { hostHunt } from "@/lib/session";
 import { readDb } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +10,8 @@ export const dynamic = "force-dynamic";
 export default async function PreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const db = await readDb();
-  const hunt = db.hunts.find((h) => h.id === id)!;
+  const hunt = await hostHunt(db, id);
+  if (!hunt) notFound();
   const cps = checkpointsOf(db, id);
   const treasure = treasureOf(db, id);
   const { errors, warnings } = validateHunt(db, id);

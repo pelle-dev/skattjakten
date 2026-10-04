@@ -67,6 +67,7 @@ function getSql(): Promise<Sql> {
     const sql = postgres(url, { max: 3, prepare: false, ssl: local ? false : "require", idle_timeout: 20, onnotice: () => {} });
     await sql`create table if not exists skattjakten_store (id int primary key, data jsonb not null, updated_at timestamptz not null default now())`;
     await sql`insert into skattjakten_store (id, data) values (1, '{}'::jsonb) on conflict (id) do nothing`;
+    await sql`create table if not exists skattjakten_ratelimit (key text primary key, count int not null, window_start timestamptz not null)`;
     return sql;
   })().catch((err) => {
     sqlPromise = null;
@@ -105,4 +106,32 @@ export async function readDb(): Promise<Db> {
 /** Läser, ändrar och sparar databasen. Ändringar körs en i taget. */
 export function mutate<T>(fn: (db: Db) => T): Promise<T> {
   return databaseUrl() ? mutatePg(fn) : mutateFile(fn);
+}
+
+// ---------------------------------------------------------------------------
+// Begränsning av antal anrop (mot missbruk, t.ex. tusentals jakter eller AI-anrop från samma ställe)
+
+const memoryHits = new Map<string, { count: number; start: number }>();
+
+/** Räknar ett anrop för nyckeln. Returnerar false om gränsen redan är nådd i det aktuella tidsfönstret. */
+export async function hit(key: string, limit: number, windowSeconds: number): Promise<boolean> {
+  if (!databaseUrl()) {
+    const now = Date.now();
+    const cur = memoryHits.get(key);
+    if (!cur || now - cur.start > windowSeconds * 1000) {
+      memoryHits.set(key, { count: 1, start: now });
+      return true;
+    }
+    cur.count += 1;
+    return cur.count <= limit;
+  }
+  const sql = await getSql();
+  const rows = await sql<{ count: number }[]>`
+    insert into skattjakten_ratelimit (key, count, window_start) values (${key}, 1, now())
+    on conflict (key) do update set
+      count = case when skattjakten_ratelimit.window_start < now() - make_interval(secs => ${windowSeconds}) then 1 else skattjakten_ratelimit.count + 1 end,
+      window_start = case when skattjakten_ratelimit.window_start < now() - make_interval(secs => ${windowSeconds}) then now() else skattjakten_ratelimit.window_start end
+    returning count`;
+  if (Math.random() < 0.01) await sql`delete from skattjakten_ratelimit where window_start < now() - interval '2 days'`;
+  return (rows[0]?.count ?? 0) <= limit;
 }
