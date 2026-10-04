@@ -1,4 +1,4 @@
-import type { AgeGroup, Difficulty, GameMode, Plan, ScoringRules, TemplateId, WinMode } from "./types";
+import type { AgeGroup, Difficulty, GameMode, ScoringRules, TemplateId, WinMode } from "./types";
 
 export const DEFAULT_SCORING: ScoringRules = {
   checkpointFound: 4,
@@ -11,9 +11,9 @@ export const DEFAULT_SCORING: ScoringRules = {
 export const QUESTIONS_PER_CHECKPOINT = 3;
 
 // ---------------------------------------------------------------------------
-// Planer (freemium). Betalning byggs inte i MVP – planen är ett internt läge.
+// Gränser. Allt är gratis just nu; betalplaner kan läggas till senare.
 
-export interface PlanLimits {
+export interface HuntLimits {
   maxActiveHunts: number;
   defaultClues: number;
   maxClues: number;
@@ -26,34 +26,18 @@ export interface PlanLimits {
   photos: boolean;
 }
 
-export const PLAN_LIMITS: Record<Plan, PlanLimits> = {
-  free: {
-    maxActiveHunts: 1,
-    defaultClues: 3,
-    maxClues: 3,
-    maxTeams: 2,
-    aiGenerations: 6,
-    templates: false,
-    gameModes: ["classic"],
-    missions: false,
-    diploma: false,
-    photos: false,
-  },
-  paid: {
-    maxActiveHunts: 20,
-    defaultClues: 10,
-    maxClues: 30,
-    maxTeams: 30,
-    aiGenerations: 1000,
-    templates: true,
-    gameModes: ["classic", "calm", "teamBattle"],
-    missions: true,
-    diploma: true,
-    photos: true,
-  },
+export const LIMITS: HuntLimits = {
+  maxActiveHunts: 20,
+  defaultClues: 10,
+  maxClues: 30,
+  maxTeams: 30,
+  aiGenerations: 1000,
+  templates: true,
+  gameModes: ["classic", "calm", "teamBattle"],
+  missions: true,
+  diploma: true,
+  photos: true,
 };
-
-export const PLAN_LABEL: Record<Plan, string> = { free: "Gratis", paid: "Betald" };
 
 // ---------------------------------------------------------------------------
 

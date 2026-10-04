@@ -143,7 +143,7 @@ src/
   components/                 Avatarer, QR-scanner, formulär m.m.
   lib/
     types.ts                  Datamodellen
-    catalog.ts                Planer, mallar, teman, spellägen, avatarer, poängregler
+    catalog.ts                Gränser, mallar, teman, spellägen, avatarer, poängregler
     hunts.ts                  Skapa/redigera jakt, ledtrådar, frågor, uppdrag, lag, validering
     game.ts                   Spelmotor: start, scanning, frågor, uppdrag, hjälp, poäng, tid, ranking
     views.ts                  Vad som skickas till webbläsaren (deltagare ser aldrig facit i förväg)
@@ -176,18 +176,11 @@ Några saker utöver specen:
 - Tid räknas från lagets egen starttid, minus tid då jakten var pausad.
 - Snabbast vinner: först den som hittade skatten snabbast. Flest poäng vinner: högst poäng, vid lika poäng den som hittade skatten snabbast.
 
-### Gratis och betald (internt läge, ingen betalning)
+### Allt är gratis
 
-| | Gratis | Betald |
-| --- | --- | --- |
-| Ledtrådar | max 3 | 10 som standard, kan ändras (max 30) |
-| Lag/deltagare | max 2 | max 30 |
-| Aktiva jakter | 1 | flera |
-| AI-förslag per jakt | 6 | obegränsat |
-| Mallar, Lugn jakt, Lagkamp | – | ja |
-| Uppdrag, lagbild, diplom | – | ja |
+Det finns inga planer just nu. Alla skattjakter får allt: mallar, alla spellägen, uppdrag, lagbild och diplom. Det finns bara några tekniska tak: max 30 ledtrådar, 30 lag/deltagare och 20 aktiva jakter. Betalplaner kan läggas till senare.
 
-Gränserna finns på ett ställe: `PLAN_LIMITS` i `src/lib/catalog.ts`.
+Gränserna finns på ett ställe: `LIMITS` i `src/lib/catalog.ts`. Äldre jakter i databasen kan ha ett gammalt `plan`-fält; det ignoreras.
 
 ---
 

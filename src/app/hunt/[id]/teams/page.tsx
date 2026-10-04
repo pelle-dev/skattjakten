@@ -40,7 +40,7 @@ export default function TeamsPage() {
           {h.startMode === "staggered"
             ? `Startordning: lagen startar i den här ordningen med ${h.startIntervalMinutes} minuters mellanrum.`
             : "Alla startar samtidigt."}{" "}
-          Max {bundle.limits.maxTeams} i {h.plan === "free" ? "gratisläget" : "den här planen"}.
+          Max {bundle.limits.maxTeams}.
         </p>
         {bundle.teams.length === 0 && <p className="muted">Inga ännu. Lägg till här eller låt deltagarna gå med med koden.</p>}
         <div className="stack">
