@@ -56,6 +56,23 @@ Knappen **Scanna QR-kod** inne i appen använder kameran direkt i webbläsaren. 
 
 ---
 
+## Publicera på nätet (Vercel)
+
+Då får du en länk som fungerar i alla mobiler, och kameran i appen fungerar eftersom adressen är https. Allt nedan är gratis.
+
+1. **Lägg in koden i main.** Öppna pull requesten på GitHub och tryck **Merge pull request** → **Confirm merge**. (Vercel publicerar det som ligger i main.)
+2. Gå till [vercel.com](https://vercel.com) och välj **Sign Up** → **Continue with GitHub**. Välj gratisplanen (Hobby).
+3. Tryck **Add New… → Project**, välj **skattjakten** i listan och tryck **Import** och sedan **Deploy**. Vänta tills det står klart.
+4. Gå in i projektet, öppna fliken **Storage** och tryck **Create Database**. Välj **Neon** (Postgres), godkänn och koppla databasen till projektet. Då läggs `DATABASE_URL` in automatiskt.
+5. Öppna fliken **Deployments**, tryck på **⋯** vid den översta och välj **Redeploy**.
+6. Öppna länken som slutar på `.vercel.app` och tryck **Skapa Testjakten**.
+
+Vill du ha riktiga AI-förslag: lägg till `ANTHROPIC_API_KEY` under **Settings → Environment Variables** och gör Redeploy igen.
+
+Med `DATABASE_URL` satt sparas all data i Postgres (tabellen `skattjakten_store` skapas automatiskt). Utan den används den lokala filen.
+
+---
+
 ## Miljövariabler
 
 Allt är frivilligt. Kopiera `.env.example` till `.env.local` och fyll i det du behöver.
@@ -65,7 +82,8 @@ Allt är frivilligt. Kopiera `.env.example` till `.env.local` och fyll i det du 
 | `ANTHROPIC_API_KEY` | Nyckel till Claude. Används för AI-förslag på ledtrådar, hjälptexter och frågor. Saknas den används inbyggda exempel (mockad AI), så att allt går att testa. |
 | `AI_MODEL` | Vilken Claude-modell som används. Standard: `claude-opus-5-5`. |
 | `PUBLIC_BASE_URL` | Adressen som QR-koder och länkar pekar på, t.ex. `http://192.168.1.10:3000`. Tom = adressen du öppnar appen med. |
-| `DATA_FILE` | Var datan sparas. Standard: `data/db.json`. |
+| `DATABASE_URL` | Postgres-databas (t.ex. Neon eller Supabase). Satt = datan sparas där. Behövs på Vercel. `POSTGRES_URL` fungerar också. |
+| `DATA_FILE` | Var datan sparas lokalt när ingen databas är satt. Standard: `data/db.json`. |
 
 AI-anropen görs bara på servern, så nyckeln syns aldrig i webbläsaren.
 
@@ -85,7 +103,7 @@ Testerna i `tests/testjakten.test.ts` går igenom alla 15 punkter i testflödet:
 ## Teknik och arkitektur
 
 - **Next.js 16 + TypeScript + React 19**, en mobil-först webbapp. Serverlogiken körs som server actions.
-- **Lagring:** en JSON-fil (`data/db.json`) via `src/lib/store.ts`. Allt går genom `readDb()` och `mutate()`, så det är den enda filen som behöver bytas för att flytta till Supabase/Postgres. Tabellerna i datamodellen motsvarar redan databastabeller.
+- **Lagring:** en JSON-fil (`data/db.json`) lokalt, eller Postgres när `DATABASE_URL` är satt, via `src/lib/store.ts`. Allt går genom `readDb()` och `mutate()`, så det är den enda filen som behöver bytas för att flytta till Supabase/Postgres. Tabellerna i datamodellen motsvarar redan databastabeller.
 - **Spelmotorn** (`src/lib/game.ts`) och **skattgömmarens logik** (`src/lib/hunts.ts`) är ren TypeScript utan beroende på Next.js. De kan återanvändas av ett framtida API för en native-app.
 - **QR-koder** genereras med `qrcode`. Varje kontrollpunkt och skatten har en slumpmässig token på 128 bitar, så de går inte att gissa. QR-koden pekar på `/s/<token>`.
 - **QR-scanning** i appen sker med kameran och `jsqr`. Mobilens vanliga kamera fungerar också.

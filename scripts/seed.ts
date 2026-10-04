@@ -10,4 +10,5 @@ mutate((db) => createTestjakten(db)).then((hunt) => {
   console.log("\nTestjakten är skapad!\n");
   console.log(`Öppna som skattgömmare: ${base}/hunt/${hunt.id}/claim?key=${hunt.hostKey}`);
   console.log(`Kod för deltagare:      ${hunt.joinCode}\n`);
+  process.exit(0);
 });
