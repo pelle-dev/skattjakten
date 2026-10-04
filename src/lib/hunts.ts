@@ -1,7 +1,7 @@
 // Skattgömmarens logik: skapa och redigera jakter, ledtrådar, frågor, uppdrag och lag.
 // Funktionerna arbetar direkt på Db-objektet och används inuti store.mutate().
 
-import { DEFAULT_SCORING, PLAN_LIMITS, QUESTIONS_PER_CHECKPOINT, templateById } from "./catalog";
+import { DEFAULT_SCORING, LIMITS, QUESTIONS_PER_CHECKPOINT, templateById } from "./catalog";
 import { newCode, newId, newQrToken, newSecret, normalizeCode } from "./ids";
 import type {
   AgeGroup,
@@ -12,7 +12,6 @@ import type {
   Hunt,
   Mission,
   Participant,
-  Plan,
   PlayMode,
   Question,
   StartMode,
@@ -34,7 +33,6 @@ export interface HuntInput {
   ageGroup: AgeGroup;
   themes: string[];
   difficulty: Difficulty;
-  plan: Plan;
   clueCount: number;
   winMode: WinMode;
   startMode: StartMode;
@@ -63,14 +61,14 @@ export const treasureOf = (db: Db, huntId: string) => db.treasures.find((t) => t
 export const teamsOf = (db: Db, huntId: string) =>
   db.teams.filter((t) => t.huntId === huntId).sort((a, b) => a.startOrder - b.startOrder);
 
-export const limitsOf = (hunt: Hunt) => PLAN_LIMITS[hunt.plan];
+export const limitsOf = (_hunt: Hunt) => LIMITS;
 
 function assertDraft(hunt: Hunt) {
   if (hunt.status !== "draft") throw new UserError("Det här går bara att ändra innan skattjakten har startat.");
 }
 
 function sanitizeInput(input: HuntInput): HuntInput {
-  const limits = PLAN_LIMITS[input.plan];
+  const limits = LIMITS;
   const name = input.name.trim();
   if (!name) throw new UserError("Ge skattjakten ett namn.");
   const gameMode = limits.gameModes.includes(input.gameMode) ? input.gameMode : "classic";
@@ -121,7 +119,7 @@ function newMission(hunt: Hunt, checkpointId: string, text: string, now: Date): 
 
 export function createHunt(db: Db, rawInput: HuntInput, now = new Date()): Hunt {
   const input = sanitizeInput(rawInput);
-  const limits = PLAN_LIMITS[input.plan];
+  const limits = LIMITS;
   const hunt: Hunt = {
     id: newId(),
     name: input.name,
@@ -134,7 +132,6 @@ export function createHunt(db: Db, rawInput: HuntInput, now = new Date()): Hunt 
     difficulty: input.difficulty,
     status: "draft",
     winMode: input.winMode,
-    plan: input.plan,
     defaultClueCount: limits.defaultClues,
     maxClues: limits.maxClues,
     startMode: input.startMode,
@@ -185,14 +182,6 @@ export function updateHuntSettings(db: Db, huntId: string, patch: HuntSettingsPa
   const onlyText = Object.keys(patch).every((k) => k === "name" || k === "description");
   if (!onlyText) assertDraft(hunt);
 
-  const plan = patch.plan ?? hunt.plan;
-  if (plan !== hunt.plan) {
-    const limits = PLAN_LIMITS[plan];
-    if (checkpointsOf(db, huntId).length > limits.maxClues)
-      throw new UserError(`Gratisläget har max ${limits.maxClues} ledtrådar. Ta bort några först.`);
-    if (teamsOf(db, huntId).length > limits.maxTeams)
-      throw new UserError(`Gratisläget har max ${limits.maxTeams} lag. Ta bort några först.`);
-  }
   const merged = sanitizeInput({
     name: patch.name ?? hunt.name,
     description: patch.description ?? hunt.description,
@@ -202,14 +191,13 @@ export function updateHuntSettings(db: Db, huntId: string, patch: HuntSettingsPa
     ageGroup: patch.ageGroup ?? hunt.ageGroup,
     themes: patch.themes ?? hunt.themes,
     difficulty: patch.difficulty ?? hunt.difficulty,
-    plan,
     clueCount: checkpointsOf(db, huntId).length,
     winMode: patch.winMode ?? hunt.winMode,
     startMode: patch.startMode ?? hunt.startMode,
     startIntervalMinutes: patch.startIntervalMinutes ?? hunt.startIntervalMinutes,
     allowPhotos: patch.allowPhotos ?? hunt.allowPhotos,
   });
-  const limits = PLAN_LIMITS[plan];
+  const limits = LIMITS;
   Object.assign(hunt, {
     name: merged.name,
     description: merged.description,
@@ -219,7 +207,6 @@ export function updateHuntSettings(db: Db, huntId: string, patch: HuntSettingsPa
     ageGroup: merged.ageGroup,
     themes: merged.themes,
     difficulty: merged.difficulty,
-    plan,
     defaultClueCount: limits.defaultClues,
     maxClues: limits.maxClues,
     winMode: merged.winMode,
@@ -250,11 +237,7 @@ export function addCheckpoint(db: Db, huntId: string, now = new Date()): Checkpo
   const existing = checkpointsOf(db, huntId);
   const limits = limitsOf(hunt);
   if (existing.length >= limits.maxClues)
-    throw new UserError(
-      hunt.plan === "free"
-        ? `Gratisläget har max ${limits.maxClues} ledtrådar. Byt till betalt läge för fler.`
-        : `Max ${limits.maxClues} ledtrådar.`,
-    );
+    throw new UserError(`Max ${limits.maxClues} ledtrådar.`);
   const cp = newCheckpoint(huntId, existing.length, hunt.difficulty, now);
   db.checkpoints.push(cp);
   if (limits.missions) {
@@ -399,12 +382,12 @@ export function deleteQuestion(db: Db, questionId: string) {
   db.questions = db.questions.filter((x) => x.id !== questionId);
 }
 
-/** Räknar AI-anrop mot planens kvot. */
+/** Räknar AI-anrop mot jaktens kvot. */
 export function useAiQuota(db: Db, huntId: string) {
   const hunt = getHunt(db, huntId);
   const limit = limitsOf(hunt).aiGenerations;
   if (hunt.aiGenerationsUsed >= limit)
-    throw new UserError(`Gratisläget har ${limit} AI-förslag per jakt. Skriv egna eller byt till betalt läge.`);
+    throw new UserError(`Den här skattjakten har använt sina ${limit} AI-förslag. Skriv egna frågor i stället.`);
   hunt.aiGenerationsUsed += 1;
 }
 
@@ -420,7 +403,7 @@ export function setMission(db: Db, checkpointId: string, text: string | null, no
     db.missions = db.missions.filter((m) => m.checkpointId !== cp.id);
     return null;
   }
-  if (!limitsOf(hunt).missions) throw new UserError("Uppdrag finns i betalt läge.");
+  if (!limitsOf(hunt).missions) throw new UserError("Uppdrag är avstängda.");
   if (existing) {
     existing.missionText = clean.slice(0, 300);
     existing.updatedAt = iso(now);
@@ -494,11 +477,7 @@ export function addTeam(db: Db, huntId: string, input: TeamInput, now = new Date
   const teams = teamsOf(db, huntId);
   const limits = limitsOf(hunt);
   if (teams.length >= limits.maxTeams)
-    throw new UserError(
-      hunt.plan === "free"
-        ? `Den här skattjakten är full (max ${limits.maxTeams} ${hunt.playMode === "team" ? "lag" : "deltagare"} i gratisläget).`
-        : "Den här skattjakten är full.",
-    );
+    throw new UserError("Den här skattjakten är full.");
   const name = input.name.trim().slice(0, 40);
   if (!name) throw new UserError(hunt.playMode === "team" ? "Skriv ett lagnamn." : "Skriv ditt namn.");
   if (teams.some((t) => t.name.toLowerCase() === name.toLowerCase())) throw new UserError("Det namnet är redan taget. Välj ett annat.");

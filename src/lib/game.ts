@@ -1,7 +1,7 @@
 // Spelmotorn: start, scanning, frågor, uppdrag, hjälp, poäng, tid och resultat.
 // Alla funktioner tar emot "now" så att tidsberoende regler går att testa.
 
-import { PLAN_LIMITS } from "./catalog";
+import { LIMITS } from "./catalog";
 import { checkpointsOf, getHunt, limitsOf, missionOf, questionsOf, teamsOf, treasureOf, UserError, validateHunt } from "./hunts";
 import { newId } from "./ids";
 import type { Db, Hunt, Participant, Team } from "./types";
@@ -116,8 +116,8 @@ export function startHunt(db: Db, huntId: string, opts: { otherActiveHunts: numb
   if (errors.length) throw new UserError(`Skattjakten kan inte starta ännu: ${errors[0]}`);
   const teams = teamsOf(db, huntId);
   if (teams.length === 0) throw new UserError("Lägg till minst ett lag eller en deltagare innan start.");
-  if (opts.otherActiveHunts >= PLAN_LIMITS[hunt.plan].maxActiveHunts)
-    throw new UserError("Gratisläget tillåter en aktiv skattjakt åt gången. Avsluta den andra först.");
+  if (opts.otherActiveHunts >= LIMITS.maxActiveHunts)
+    throw new UserError(`Du kan ha högst ${LIMITS.maxActiveHunts} skattjakter igång samtidigt. Avsluta någon först.`);
 
   hunt.status = "active";
   hunt.globalStartedAt = iso(now);

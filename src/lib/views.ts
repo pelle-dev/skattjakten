@@ -1,7 +1,7 @@
 // Bygger de dataobjekt som skickas till webbläsaren.
 // Deltagarvyn får aldrig se rätt svar i förväg, framtida ledtrådar, placeringar eller QR-tokens.
 
-import { PLAN_LIMITS, type PlanLimits } from "./catalog";
+import { LIMITS, type HuntLimits } from "./catalog";
 import { maxScore, ranking, teamStats, type PlayContext, type RankRow, type TeamStats } from "./game";
 import { checkpointsOf, missionOf, questionsOf, teamsOf, treasureOf, validateHunt, type Validation } from "./hunts";
 import type { Checkpoint, Db, Hunt, Mission, Question, Team, Treasure } from "./types";
@@ -101,8 +101,8 @@ export function buildPlayState(db: Db, ctx: PlayContext, now: Date): PlayState {
       playMode: hunt.playMode,
       calm: hunt.gameMode === "calm",
       totalSteps: cps.length + 1,
-      allowPhotos: hunt.allowPhotos && PLAN_LIMITS[hunt.plan].photos,
-      diploma: PLAN_LIMITS[hunt.plan].diploma,
+      allowPhotos: hunt.allowPhotos && LIMITS.photos,
+      diploma: LIMITS.diploma,
       hintPenalty: hunt.scoring.hintPenalty,
       finishedAt: hunt.finishedAt,
     },
@@ -148,7 +148,7 @@ export interface HostCheckpoint extends Checkpoint {
 
 export interface HostBundle {
   hunt: Hunt;
-  limits: PlanLimits;
+  limits: HuntLimits;
   checkpoints: HostCheckpoint[];
   treasure: Treasure | null;
   teams: (Team & { participants: { id: string; name: string }[] })[];
@@ -160,7 +160,7 @@ export interface HostBundle {
 export function buildHostBundle(db: Db, hunt: Hunt, aiMode: "claude" | "mock"): HostBundle {
   return {
     hunt,
-    limits: PLAN_LIMITS[hunt.plan],
+    limits: LIMITS,
     checkpoints: checkpointsOf(db, hunt.id).map((cp) => ({ ...cp, questions: questionsOf(db, cp.id), mission: missionOf(db, cp.id) })),
     treasure: treasureOf(db, hunt.id),
     teams: teamsOf(db, hunt.id).map((t) => ({

@@ -20,7 +20,7 @@ export default function SettingsPage() {
     <div style={{ maxWidth: 720 }}>
       {locked && <div className="notice warn">Skattjakten har startat. Bara namn och beskrivning kan ändras nu.</div>}
       <HuntForm
-        key={h.id + h.plan}
+        key={h.id}
         mode="edit"
         locked={locked}
         busy={busy}
@@ -33,7 +33,6 @@ export default function SettingsPage() {
           ageGroup: h.ageGroup,
           themes: h.themes,
           difficulty: h.difficulty,
-          plan: h.plan,
           clueCount: bundle.checkpoints.length,
           winMode: h.winMode,
           startMode: h.startMode,

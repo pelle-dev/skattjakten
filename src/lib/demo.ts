@@ -51,7 +51,6 @@ export function createTestjakten(db: Db, now = new Date()): Hunt {
       ageGroup: "child",
       themes: ["animals", "fairytales"],
       difficulty: "easy",
-      plan: "paid",
       clueCount: 3,
       winMode: "points",
       startMode: "staggered",

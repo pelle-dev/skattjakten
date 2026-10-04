@@ -35,7 +35,7 @@ export async function joinInfoAction(code: string) {
       huntId: hunt.id,
       name: hunt.name,
       playMode: hunt.playMode,
-      allowPhotos: hunt.allowPhotos && hunt.plan === "paid",
+      allowPhotos: hunt.allowPhotos,
       team: team ? { name: team.name, avatarId: team.avatarId } : null,
     };
   });

@@ -6,7 +6,6 @@ export type HuntStatus = "draft" | "active" | "paused" | "finished";
 export type PlayMode = "individual" | "team";
 export type GameMode = "classic" | "calm" | "teamBattle" | "pointHunt";
 export type WinMode = "fastest" | "points";
-export type Plan = "free" | "paid";
 export type StartMode = "simultaneous" | "staggered";
 export type AgeGroup = "child" | "youth" | "adult";
 export type Difficulty = "easy" | "medium" | "tricky";
@@ -45,7 +44,6 @@ export interface Hunt {
   difficulty: Difficulty;
   status: HuntStatus;
   winMode: WinMode;
-  plan: Plan;
   defaultClueCount: number;
   maxClues: number;
   startMode: StartMode;
