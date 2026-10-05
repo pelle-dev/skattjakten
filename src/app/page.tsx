@@ -1,12 +1,41 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/Brand";
 import { hostHuntIds, playerHuntIds } from "@/lib/session";
+import { SITE_URL } from "@/lib/site";
 import { readDb } from "@/lib/store";
 import type { HuntStatus } from "@/lib/types";
 import { DemoButton } from "./DemoButton";
 import { HowItWorks } from "./HowItWorks";
 
 export const dynamic = "force-dynamic";
+
+const TITLE = "Skattjakt för barn – skapa din egen med QR-koder | Skattjakten";
+const DESCRIPTION =
+  "Skapa en rolig skattjakt för barn på några minuter. Göm QR-koder, lös ledtrådar och uppdrag i mobilen och hitta skatten. Perfekt till barnkalas och påskäggsjakt.";
+
+// Startsidan är den enda sidan som ska synas i sökresultat.
+export const metadata: Metadata = {
+  title: { absolute: TITLE },
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: "/" },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
+};
+
+// Berättar för Google vad sidan är (en gratis webbapp på svenska).
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Skattjakten",
+  url: SITE_URL,
+  inLanguage: "sv-SE",
+  applicationCategory: "GameApplication",
+  operatingSystem: "Webbläsare",
+  description: DESCRIPTION,
+  offers: { "@type": "Offer", price: "0", priceCurrency: "SEK" },
+};
 
 const STATUS: Record<HuntStatus, { label: string; cls: string }> = {
   draft: { label: "Utkast", cls: "grey" },
@@ -26,9 +55,9 @@ export default async function Home() {
     <>
       <main className="page">
         <section className="hero center">
-          <h1 className="sr-only">Skattjakten</h1>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
           <Logo width={300} className="hero-logo" />
-          <p className="hero-lead">Skapa en rolig skattjakt på några minuter.</p>
+          <h1 className="hero-lead">Skapa en rolig skattjakt på några minuter.</h1>
           <p className="muted">Göm, scanna, lös och hitta skatten.</p>
         </section>
 

@@ -35,7 +35,16 @@ const nextConfig: NextConfig = {
   experimental: { serverActions: { bodySizeLimit: "1mb" } },
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Samma app finns även på skattjakten.vercel.app. Den adressen ska inte synas i Google,
+      // så att bara skattjakten.app räknas.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: ".*\\.vercel\\.app" }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex" }],
+      },
+    ];
   },
 };
 
