@@ -121,6 +121,10 @@ export default async function Home() {
           </p>
           <DemoButton />
         </section>
+
+        <p className="center small" style={{ marginTop: 20 }}>
+          Ska du ha kalas? Läs om <Link href="/skattjakt-barnkalas">skattjakt till barnkalas</Link>.
+        </p>
       </main>
     </>
   );
