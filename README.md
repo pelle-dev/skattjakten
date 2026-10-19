@@ -84,6 +84,7 @@ Allt är frivilligt. Kopiera `.env.example` till `.env.local` och fyll i det du 
 | `PUBLIC_BASE_URL` | Adressen som QR-koder och länkar pekar på, t.ex. `http://192.168.1.10:3000`. Tom = adressen du öppnar appen med. |
 | `DATABASE_URL` | Postgres-databas (t.ex. Neon eller Supabase). Satt = datan sparas där. Behövs på Vercel. `POSTGRES_URL` fungerar också. |
 | `DATA_FILE` | Var datan sparas lokalt när ingen databas är satt. Standard: `data/db.json`. |
+| `STATISTIK_LOSENORD` | Lösenord till statistiksidan `/statistik`, som visar hur många jakter, lag och deltagare som finns. Saknas det är sidan avstängd. |
 
 AI-anropen görs bara på servern, så nyckeln syns aldrig i webbläsaren.
 
@@ -193,3 +194,7 @@ Native-app, betalning, GPS/kartor, pushnotiser, publika eller kommersiella jakte
 - En skattjakt raderas automatiskt, med alla lag, namn, bilder och svar, 90 dagar efter senaste aktivitet (för en avslutad jakt: 90 dagar efter avslut). Rensningen körs varje natt (`vercel.json`, `/api/cleanup`) och när en ny jakt skapas.
 - Varje värdsida under `/hunt/[id]` måste själv kontrollera värdnyckeln med `hostHunt()`; layouten räcker inte som skydd.
 - Antal nya jakter, anslutningar och AI-förslag begränsas per nätverk. `AI_DAILY_LIMIT` (standard 2000) är taket för AI-förslag per dygn i hela appen.
+
+## Besöksstatistik
+
+Appen skickar sidvisningar till Vercel Web Analytics (`src/components/WebAnalytics.tsx`). Det använder inga cookies och sparar inga personuppgifter. Adresser med hemliga koder (jakter, lag, QR-koder) skickas bara som mönster, t.ex. `/hunt/[id]/teams`, och statistiksidan räknas inte. Slå på det under **Analytics** i projektet på Vercel.
