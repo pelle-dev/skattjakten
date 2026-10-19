@@ -409,6 +409,7 @@ div.field > small {
 
 input[type="text"],
 input[type="number"],
+input[type="password"],
 input:not([type]),
 textarea,
 select {

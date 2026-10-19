@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Atkinson_Hyperlegible, Nunito_Sans } from "next/font/google";
+import { WebAnalytics } from "@/components/WebAnalytics";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -30,7 +31,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="sv" className={`${nunitoSans.variable} ${atkinson.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <WebAnalytics />
+      </body>
     </html>
   );
 }
